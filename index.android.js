@@ -48,7 +48,10 @@ const month_name = [
 const sectionContent = ["Aujourd'hui", "Demain", "7 Jours", "30 Jours"]
 const sectionsID = sectionContent.map((s, id) => id)
 
-const getStartDate = () => "2015-10-01"
+const getStartDate = () => {
+  const start = new Date(Date.now())
+  return start.getFullYear() + '-' + (start.getMonth() + 1) + '-' + start.getDate()
+}
 const getEndDate = () => {
   const start = new Date(getStartDate())
   const end = new Date(start.getTime() + 1000 * 60 * 60 * 24 * 30)
