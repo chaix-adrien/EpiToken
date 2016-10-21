@@ -12,10 +12,12 @@ import {
   ListView,
   View,
   Dimensions,
+  RefreshControl,
+  TextInput
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'
 
-import credentials from './credentials.json'
+var Keychain = require('react-native-keychain');
 
 const apiRoot = "https://intra.epitech.eu/"
 const days_name = [
@@ -62,9 +64,11 @@ export class Activitie extends Component {
   render() {
     const {activitie, section} = this.props 
     const date = new Date(activitie.start.split(' ')[0])
+    let room = activitie.room.code.split('/')
+    room = room[room.length - 1]
     return (
       <View style={styles.activitieContainer}>
-        <View style={{flex: 8}}>
+        <View style={{flex: 6}}>
           <Text style={styles.activitieTitle}>{activitie.acti_title}</Text>
           <Text style={styles.moduleTitle}>{activitie.titlemodule}</Text>
           {section > 1 ?
@@ -72,6 +76,7 @@ export class Activitie extends Component {
             : null
           }
         </View>
+        <Text style={{color: "black", fontSize: 20, flex: 2, textAlign: "center"}}>{room}</Text>
         <View style={{flexDirection: "row", alignItems: "center", flex:2}}>
           <Icon name="long-arrow-down" size={30} color="#DDDDDD" style={{margin: 3}} />
           <View>
@@ -85,13 +90,64 @@ export class Activitie extends Component {
 }
 
 
+export class LogWindow extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      login: "",
+      password: "",
+    }
+  }
+
+  render() {
+    
+    return (
+      <View>
+        <TextInput
+          style={{width: Dimensions.get("window").width, height: 50}}
+          value={this.state.login}
+          onChangeText={(text) => this.setState({login: text})}
+          placeholder="e-mail"
+          autoCorrect={false}
+          autoCapitalize={'none'}
+          keyboardType={'email-address'}
+          onSubmitEditing={() => {
+             this.verify_this_login(this.state.login, this.state.password)
+         }}
+       />
+
+        <TextInput
+          style={{width: Dimensions.get("window").width, height: 50}}
+          ref={(elem) => (this.passwordInput = elem)}
+          onChangeText={(text) => this.setState({password: text})}
+          placeholder="Password"
+          autoCorrect={false}
+          autoCapitalize={'none'}
+          secureTextEntry={true}
+          onSubmitEditing={() => {
+            this.props.verify_this_login(this.state.login, this.state.password)
+          }}
+        />
+
+      </View>
+    );
+  }
+}
+
 export default class EpiToken extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      activities: []
+      activities: [],
+      refreshing: true,
+      loged: false,
     }
-    this.logIn(credentials.login, credentials.password)
+    Keychain.getGenericPassword().then(credentials => {
+      this.logIn(credentials.username, credentials.password).then(rep => {
+        if (rep)
+          this.setState({loged: true})
+      })
+    }).catch(e => null)
   }
 
   componentWillMount() {
@@ -106,7 +162,7 @@ export default class EpiToken extends Component {
        method: "POST",
     body: data
    }
-   fetch(apiRoot + "?format=json", header).then(res => res.json()).then(rep => console.log("Connected"))
+   return fetch(apiRoot + "?format=json", header).then(res => res.json()).catch(e => null)
   }
 
   loadActivities = () => {
@@ -135,16 +191,30 @@ export default class EpiToken extends Component {
       }
       
     })
-    this.setState({activities: out})
+    this.setState({activities: out, refreshing: false})
    })
+  }
+
+  verify_this_login = (log, pass) => {
+    this.logIn(log, pass).then(rep => {
+      if (rep) {
+        Keychain.setGenericPassword(log, pass)
+        this.setState({loged: true})
+      }
+    })
   }
 
   render() {
     let listData = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2, sectionHeaderHasChanged: (r1, r2) => r1 !== r2})
     return (
       <View style={styles.container}>
-        {this.state.activities.length ? 
+        {!this.state.loged ? 
+          <LogWindow verify_this_login={this.verify_this_login}/>
+          : null
+        }
+        {(this.state.activities.length && this.state.loged) ? 
           <ListView
+            refreshControl={ <RefreshControl refreshing={this.state.refreshing} onRefresh={this.loadActivities()} /> }
             style={{width: Dimensions.get("window").width}}
             dataSource={listData.cloneWithRowsAndSections(this.state.activities, sectionsID)}
             enableEmptySections={true}
@@ -171,6 +241,7 @@ const styles = StyleSheet.create({
   activitieContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     marginLeft: 5,
     marginRight: 5,
     marginTop: 2,
