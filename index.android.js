@@ -13,9 +13,11 @@ import {
   View,
   Dimensions,
   RefreshControl,
-  TextInput
+  TextInput,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'
+import Spinner from 'react-native-loading-spinner-overlay';
 
 var Keychain = require('react-native-keychain');
 
@@ -50,6 +52,8 @@ const sectionsID = sectionContent.map((s, id) => id)
 
 const getStartDate = () => {
   const start = new Date(Date.now())
+  if (__DEV__)
+    return "2015-10-01"
   return start.getFullYear() + '-' + (start.getMonth() + 1) + '-' + start.getDate()
 }
 const getEndDate = () => {
@@ -65,7 +69,7 @@ export class Activitie extends Component {
   }
 
   render() {
-    const {activitie, section} = this.props 
+    const {activitie, section} = this.props
     const date = new Date(activitie.start.split(' ')[0])
     let room = activitie.room.code.split('/')
     room = room[room.length - 1]
@@ -79,7 +83,7 @@ export class Activitie extends Component {
             : null
           }
         </View>
-        <Text style={{color: "black", fontSize: 20, flex: 2, textAlign: "center"}}>{room}</Text>
+        <Text style={{color: "black", fontSize: 20, flex: 2, textAlign: "center", fontStyle: 'italic'}}>{room}</Text>
         <View style={{flexDirection: "row", alignItems: "center", flex:2}}>
           <Icon name="long-arrow-down" size={30} color="#DDDDDD" style={{margin: 3}} />
           <View>
@@ -99,13 +103,23 @@ export class LogWindow extends Component {
     this.state = {
       login: "",
       password: "",
+      loading: true,
     }
+    Keychain.getGenericPassword().then(credentials => {
+      this.props.verify_this_login(credentials.username, credentials.password).then((rep) => !rep ? this.setState({loading: false}) : null)
+    })
+  }
+
+  try_logIn = () => {
+    this.setState({loading: true}, () => {
+      this.props.verify_this_login(this.state.login, this.state.password).then((rep) => !rep ? this.setState({loading: false}) : null)
+    })
   }
 
   render() {
-    
     return (
       <View>
+        <Spinner visible={this.state.loading} />
         <TextInput
           style={{width: Dimensions.get("window").width, height: 50}}
           value={this.state.login}
@@ -114,11 +128,8 @@ export class LogWindow extends Component {
           autoCorrect={false}
           autoCapitalize={'none'}
           keyboardType={'email-address'}
-          onSubmitEditing={() => {
-             this.verify_this_login(this.state.login, this.state.password)
-         }}
+          onSubmitEditing={() => this.try_logIn()}
        />
-
         <TextInput
           style={{width: Dimensions.get("window").width, height: 50}}
           ref={(elem) => (this.passwordInput = elem)}
@@ -127,11 +138,11 @@ export class LogWindow extends Component {
           autoCorrect={false}
           autoCapitalize={'none'}
           secureTextEntry={true}
-          onSubmitEditing={() => {
-            this.props.verify_this_login(this.state.login, this.state.password)
-          }}
+          onSubmitEditing={() => this.try_logIn()}
         />
-
+        <Icon.Button name="gear" backgroundColor="#3b5998" onPress={() => this.try_logIn()}>
+          Log In
+        </Icon.Button>
       </View>
     );
   }
@@ -142,19 +153,16 @@ export default class EpiToken extends Component {
     super(props)
     this.state = {
       activities: [],
-      refreshing: true,
+      refreshing: false,
       loged: false,
     }
-    Keychain.getGenericPassword().then(credentials => {
-      this.logIn(credentials.username, credentials.password).then(rep => {
-        if (rep)
-          this.setState({loged: true})
-      })
-    }).catch(e => null)
   }
 
-  componentWillMount() {
-    this.loadActivities()
+  logOut = () => {
+   const header = {
+       method: "POST",
+   }
+   return fetch(apiRoot + "/logout?format=json", header).then(res => res.json()).catch(e => null)
   }
 
   logIn = (log, pass) => {
@@ -165,7 +173,11 @@ export default class EpiToken extends Component {
        method: "POST",
     body: data
    }
-   return fetch(apiRoot + "?format=json", header).then(res => res.json()).catch(e => null)
+   return fetch(apiRoot + "?format=json", header).then(res => res.json()).then(rep => {
+    if (rep.message) {
+      Alert.alert("Error while login:", rep.message)
+    }
+    return !rep.message}).catch(e => null)
   }
 
   loadActivities = () => {
@@ -178,6 +190,7 @@ export default class EpiToken extends Component {
    }
    fetch(apiRoot + "planning/load" + "?format=json", header).then(res => res.json())
    .then(activitiesBrut => {
+    if (activitiesBrut.message) return
     const myActivities = activitiesBrut.filter(act => (__DEV__) ? act.event_registered : act.event_registered === "registered")
     const out = sectionContent.map(e => [])
     const today = new Date(getNowDate())
@@ -192,18 +205,20 @@ export default class EpiToken extends Component {
       } else {
         out[3].push(act)
       }
-      
     })
     this.setState({activities: out, refreshing: false})
    })
   }
 
   verify_this_login = (log, pass) => {
-    this.logIn(log, pass).then(rep => {
+    return this.logIn(log, pass).then(rep => {
       if (rep) {
         Keychain.setGenericPassword(log, pass)
-        this.setState({loged: true})
+        this.loadActivities()
+        this.setState({loged: true, refreshing: true})
+        return true
       }
+      return false
     })
   }
 
@@ -211,22 +226,21 @@ export default class EpiToken extends Component {
     let listData = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2, sectionHeaderHasChanged: (r1, r2) => r1 !== r2})
     return (
       <View style={styles.container}>
-        {!this.state.loged ? 
+        <Spinner visible={this.state.refreshing} />
+        {!this.state.loged ?
           <LogWindow verify_this_login={this.verify_this_login}/>
           : null
         }
-        {(this.state.activities.length && this.state.loged) ? 
+        {(this.state.activities.some(e => e.length) && this.state.loged) ?
           <ListView
-            refreshControl={ <RefreshControl refreshing={this.state.refreshing} onRefresh={this.loadActivities()} /> }
+            refreshControl={<RefreshControl refreshing={this.state.refreshing} onRefresh={this.loadActivities}/>}
             style={{width: Dimensions.get("window").width}}
             dataSource={listData.cloneWithRowsAndSections(this.state.activities, sectionsID)}
             enableEmptySections={true}
-            renderRow={(rowData, sid, id) => 
-              <Activitie activitie={rowData} section={sid}/>
-            }
-            renderSectionHeader={(data, id) => <Text style={styles.header}>{sectionContent[id]}</Text>
-            }
+            renderRow={(rowData, sid, id) => <Activitie activitie={rowData} section={sid}/>}
+            renderSectionHeader={(data, id) => (data.length) ? <Text style={styles.header}>{sectionContent[id]}</Text> : null}
           />
+          : (this.state.loged) ? <Text style={styles.activitieTitle}>There is no activities for you !</Text>
           : null
         }
       </View>
