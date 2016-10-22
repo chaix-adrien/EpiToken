@@ -172,7 +172,7 @@ export class LogWindow extends Component {
     }
     Keychain.getGenericPassword().then(credentials => {
       this.props.verify_this_login(credentials.username, credentials.password).then((rep) => !rep ? this.setState({loading: false}) : null)
-    })
+    }).catch(e => this.setState({loading: false}))
   }
 
   try_logIn = () => {
@@ -352,7 +352,13 @@ export default class EpiToken extends Component {
             renderRow={(rowData, sid, id) => (sid === 0 ) ? <ActivitieToken sendToken={this.sendToken} activitie={rowData} />: <Activitie activitie={rowData} section={sid}/>}
             renderSectionHeader={(data, id) => (data.length) ? <Text style={[styles.header, {backgroundColor: id ? "#81d4fa" : "#EF5350"}]}>{sectionContent[id]}</Text> : null}
           />
-          : (this.state.loged) ? <Text style={styles.activitieTitle}>There is no activities for you !</Text>
+          : (this.state.loged) ? 
+            <View>
+              <Text style={styles.activitieTitle}>There is no activities for you !</Text>
+                <Icon.Button name="refresh" backgroundColor="#3b5998" onPress={() => this.loadActivities()}>
+                  Refresh
+                </Icon.Button>
+            </View>
           : null
         }
       </View>
