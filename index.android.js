@@ -47,7 +47,7 @@ const month_name = [
   "Decembre",
 ]
 
-const sectionContent = ["Aujourd'hui", "Demain", "7 Jours", "30 Jours"]
+const sectionContent = ["TOKEN", "Aujourd'hui", "Demain", "7 Jours", "30 Jours"]
 const sectionsID = sectionContent.map((s, id) => id)
 
 const getStartDate = () => {
@@ -62,6 +62,71 @@ const getEndDate = () => {
   return end.getFullYear() + '-' + (end.getMonth() + 1) + '-' + end.getDate()
 }
 const getNowDate = () => getStartDate()
+
+export class ActivitieToken extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      token: "",
+    }
+  }
+
+  isValidToken = (token) => {
+    if (!token) return false
+    if (token.length !== 8) return false
+    if (token.match(/^\d+$/)) return true
+  }
+
+  sendToken = () => {
+    if (!this.isValidToken(this.state.token)) {
+      Alert.alert("Token Invalide", "Un token est composé de 8 chiffres")
+      return
+    }
+    this.props.sendToken(this.props.activitie, this.state.token).then(res => {
+      if (res) {
+        this.setState({token: ""})
+      }
+    })
+  }
+
+  render() {
+    const {activitie} = this.props
+    if (!activitie) return null
+    const date = new Date(activitie.start.split(' ')[0])
+    let room = activitie.room.code.split('/')
+    room = room[room.length - 1]
+    return (
+      <View style={styles.tokenContainer}>
+        <View style={{flexDirection: "row"}}>
+          <View style={{flex: 8}}>
+            <Text style={styles.activitieTitle}>{activitie.acti_title}</Text>
+            <Text style={styles.date}>{days_name[date.getDay()]} {date.getDate()} {month_name[date.getMonth()]} - {activitie.start.split(' ')[1].split(':').slice(0, 2).join(':')}</Text>
+          </View>
+          <Text style={[styles.room, {flex: 2}]}>{room}</Text>
+        </View>
+        <View style={{flexDirection: "row", justifyContent: "center", alignItems: "center", padding: 10}}>
+          <TextInput
+            style={{width: Dimensions.get("window").width - 70, height: 50, fontSize: 20}}
+            value={this.state.token}
+            onChangeText={(text) => this.setState({token: text})}
+            placeholder="Enter token here"
+            autoCorrect={false}
+            autoCapitalize={'none'}
+            keyboardType={'numeric'}
+            onSubmitEditing={() => this.sendToken()}
+          />
+          <Icon
+            name="check-circle"
+            size={30}
+            color={this.isValidToken(this.state.token) ? "green" : "grey"}
+            style={{margin: 3, marginRight: 10}}
+            onPress={() => this.sendToken()}
+          />
+        </View>
+      </View>
+    );
+  }
+}
 
 export class Activitie extends Component {
   constructor(props) {
@@ -83,7 +148,7 @@ export class Activitie extends Component {
             : null
           }
         </View>
-        <Text style={{color: "black", fontSize: 20, flex: 2, textAlign: "center", fontStyle: 'italic'}}>{room}</Text>
+        <Text style={styles.room}>{room}</Text>
         <View style={{flexDirection: "row", alignItems: "center", flex:2}}>
           <Icon name="long-arrow-down" size={30} color="#DDDDDD" style={{margin: 3}} />
           <View>
@@ -125,6 +190,7 @@ export class LogWindow extends Component {
           value={this.state.login}
           onChangeText={(text) => this.setState({login: text})}
           placeholder="e-mail"
+
           autoCorrect={false}
           autoCapitalize={'none'}
           keyboardType={'email-address'}
@@ -196,14 +262,18 @@ export default class EpiToken extends Component {
     const today = new Date(getNowDate())
     myActivities.forEach((act, id) => {
       const actDate = new Date(act.start.split(' ')[0])
-      if (actDate.getTime() - today.getTime() < 1000 * 60 * 60 * 24) {
+      if (__DEV__ && Math.random() < 0.1)
+        act.allow_token = true
+      if (act.allow_token) {
         out[0].push(act)
-      } else if (actDate.getTime() - today.getTime() < 1000 * 60 * 60 * 24 * 2) {
+      } else if (actDate.getTime() - today.getTime() < 1000 * 60 * 60 * 24) {
         out[1].push(act)
-      } else if (actDate.getTime() - today.getTime() < 1000 * 60 * 60 * 24 * 7) {
+      } else if (actDate.getTime() - today.getTime() < 1000 * 60 * 60 * 24 * 2) {
         out[2].push(act)
-      } else {
+      } else if (actDate.getTime() - today.getTime() < 1000 * 60 * 60 * 24 * 7) {
         out[3].push(act)
+      } else {
+        out[4].push(act)
       }
     })
     this.setState({activities: out, refreshing: false})
@@ -222,6 +292,48 @@ export default class EpiToken extends Component {
     })
   }
 
+  getTokenLink = (act) => {
+    return `${apiRoot}/module/${act.scolaryear}/${act.codemodule}/${act.codeinstance}/${act.codeacti}/${act.codeevent}/token?format=json`
+  }
+
+  deleteActivitie = (acts, act) => {
+    let out = JSON.parse(JSON.stringify(acts))
+    const actStr = this.getTokenLink(act)
+    out = out.map((part) => {
+      if (!part || !part.length) return part
+      for (let i = 0; i < part.length; i++) {
+        if (actStr === this.getTokenLink(part[i])) {
+          part = part.slice(0, i).concat(part.slice(i + 1, part.length))
+          return part
+        }
+      }
+      return part
+    })
+    return out
+  }
+
+  sendToken = (act, token) => {
+    var data = new FormData();
+    data.append("token", token)
+    data.append("rate", 0)
+    data.append("comment", "I Love Adrien Chaix <3")
+    const header = {
+      method: "POST",
+      body: data
+    }
+    return fetch(this.getTokenLink(act), header)
+    .then(res => res.json())
+    .then(rep => {
+      if ((__DEV__) ? !rep.error : rep.error) {
+        Alert.alert("Mauvais token:", rep.error)
+        return false
+      } else {
+        this.setState({activities: this.deleteActivitie(this.state.activities, act)})
+        return true
+      }
+    })
+  }
+
   render() {
     let listData = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2, sectionHeaderHasChanged: (r1, r2) => r1 !== r2})
     return (
@@ -237,8 +349,8 @@ export default class EpiToken extends Component {
             style={{width: Dimensions.get("window").width}}
             dataSource={listData.cloneWithRowsAndSections(this.state.activities, sectionsID)}
             enableEmptySections={true}
-            renderRow={(rowData, sid, id) => <Activitie activitie={rowData} section={sid}/>}
-            renderSectionHeader={(data, id) => (data.length) ? <Text style={styles.header}>{sectionContent[id]}</Text> : null}
+            renderRow={(rowData, sid, id) => (sid === 0 ) ? <ActivitieToken sendToken={this.sendToken} activitie={rowData} />: <Activitie activitie={rowData} section={sid}/>}
+            renderSectionHeader={(data, id) => (data.length) ? <Text style={[styles.header, {backgroundColor: id ? "#81d4fa" : "#EF5350"}]}>{sectionContent[id]}</Text> : null}
           />
           : (this.state.loged) ? <Text style={styles.activitieTitle}>There is no activities for you !</Text>
           : null
@@ -267,6 +379,17 @@ const styles = StyleSheet.create({
     padding: 5,
     elevation: 5,
   },
+  tokenContainer: {
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginLeft: 5,
+    marginRight: 5,
+    marginTop: 2,
+    marginBottom: 2,
+    backgroundColor: "white",
+    padding: 5,
+    elevation: 5,
+  },
   activitieTitle: {
     fontSize: 20,
     fontWeight: "bold",
@@ -277,7 +400,6 @@ const styles = StyleSheet.create({
   },
   header: {
     flex: 1,
-    backgroundColor: "#81d4fa",
     padding: 5,
     elevation: 20,
     fontWeight: "bold",
@@ -290,6 +412,14 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 17,
     color: "black",
+  },
+  room: {
+    color: "black",
+    fontSize: 20,
+    flex: 2,
+    textAlign: "center",
+    fontStyle: 'italic',
+    textAlignVertical: "center"
   }
 });
 
