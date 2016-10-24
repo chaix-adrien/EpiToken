@@ -13,10 +13,7 @@ import Spinner from 'react-native-loading-spinner-overlay';
 
 import {ActivitieToken, Activitie} from './Activitie.js'
 
-var Keychain = require('react-native-keychain');
-
 const apiRoot = "https://intra.epitech.eu/"
-
 const sectionContent = ["TOKEN", "Aujourd'hui", "Demain", "7 Jours", "30 Jours"]
 const sectionsID = sectionContent.map((s, id) => id)
 
@@ -51,14 +48,6 @@ export default class ActList extends Component {
 
   componentWillMount() {
     this.loadActivities()
-  }
-
-  logOut = () => {
-   const header = {
-       method: "POST",
-   }
-   Keychain.setGenericPassword("UNDEFINED", "UNDEFINED")
-   return fetch(apiRoot + "/logout?format=json", header).then(res => res.json()).catch(e => null)
   }
 
   apiDatetoDate = (str) => {

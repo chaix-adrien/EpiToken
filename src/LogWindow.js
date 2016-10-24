@@ -19,9 +19,13 @@ export default class LogWindow extends Component {
       password: "",
       loading: true,
     }
-    Keychain.getGenericPassword().then(credentials => {
-      this.try_logIn(credentials.username, credentials.password)
-    }).catch(e => this.setState({loading: false}))
+    if (this.props.tryToLogOnMount) {
+      Keychain.getGenericPassword().then(credentials => {
+        this.try_logIn(credentials.username, credentials.password)
+      }).catch(e => this.setState({loading: false}))
+    } else {
+      this.state.loading = false
+    }
   }
 
 
@@ -34,7 +38,7 @@ export default class LogWindow extends Component {
       body: data
     }
     return fetch(apiRoot + "?format=json", header).then(res => res.json()).then(rep => {
-      if (rep.message) {
+      if (rep.message && log !== "UNDEFINED") {
         Alert.alert("Error while login:", rep.message)
       }
       return !rep.message
