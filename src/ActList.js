@@ -7,6 +7,7 @@ import {
   Dimensions,
   RefreshControl,
   Alert,
+  AsyncStorage,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'
 
@@ -62,6 +63,35 @@ export default class ActList extends Component {
       return Math.round((d1.getTime() - d2.getTime()) / (1000 * 60 * 60 * 24))
   }
 
+
+  setNotification = (act, minBefore) => {
+    if (this.apiDatetoDate(act.start).getTime() - 1000 * 60 * minBefore > Date.now()) {
+      PushNotification.localNotificationSchedule({
+          largeIcon: "ic_launcher",
+          smallIcon: "ic_launcher",
+          bigText: "My big text that will be shown when notification is expanded",
+          vibrate: true,
+          title: act.acti_title,
+          message: "My Notification Message",
+          color: this.minToColor(minBefore),
+          playSound: true,
+          soundName: 'default',
+          date: new Date(this.apiDatetoDate(act.start).getTime() - 1000 * 60 * minBefore),
+      });
+    }
+  }
+
+  activeNotification = (acts, refs, minBefore) => {
+    acts.forEach(act => {
+      const notif = refs.get(this.getTokenLink(act)) ? refs.get(this.getTokenLink(act)) : []
+      if (!notif.length || notif.indexOf(minBefore) === -1) {
+        this.setNotification(act, minBefore)
+        notif.push(minBefore)
+        refs.set(this.getTokenLink(act), notif)
+      }
+    })
+  }
+
   loadActivities = () => {
    var data = new FormData();
    data.append("start", getStartDate())
@@ -84,8 +114,6 @@ export default class ActList extends Component {
     myActivities.forEach((act, id) => {
       const actDate = new Date(act.start.split(' ')[0] + "T" + act.start.split(' ')[1])
       const actDateEnd = new Date(act.end.split(' ')[0] + "T" + act.end.split(' ')[1])
-      if (__DEV__ && Math.random() < 0.1)
-        act.allow_token = true
       if (today.getTime() < actDateEnd.getTime() && today.getTime() > actDate.getTime()) {
         out[sectionContent.indexOf("MAINTENANT")].push(act)
       } else if (act.allow_token) {
@@ -102,6 +130,7 @@ export default class ActList extends Component {
         out[sectionContent.indexOf("30 Jours")].push(act)
       }
     })
+    this.props.activeNotification(myActivities)
     this.props.switchLoading(false)
     this.setState({activities: out, refreshing: false})
    })
@@ -163,7 +192,7 @@ export default class ActList extends Component {
             renderSectionHeader={(data, id) => (data.length) ? <Text style={[styles.header, {backgroundColor: sectionColor[id]}]}>{sectionContent[id]}</Text> : null}
           />
           :
-          <View>
+          <View style={{width: Dimensions.get("window").width, margin: 10, padding: 10}}>
             <Text style={styles.activitieTitle}>There is no activities for you !</Text>
               <Icon.Button name="refresh" backgroundColor="#3b5998" onPress={() => this.loadActivities()}>
                 {"Reload the {INNOVATION.}"}
