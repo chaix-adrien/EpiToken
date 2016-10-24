@@ -50,18 +50,26 @@ const month_name = [
 const sectionContent = ["TOKEN", "Aujourd'hui", "Demain", "7 Jours", "30 Jours"]
 const sectionsID = sectionContent.map((s, id) => id)
 
-const getStartDate = () => {
+
+
+const getNowDate = () => {
   const start = new Date(Date.now())
   if (__DEV__)
     return "2015-10-01"
   return start.getFullYear() + '-' + (start.getMonth() + 1) + '-' + start.getDate()
 }
+
+const getStartDate = () => {
+  const now = new Date(getNowDate())
+  const start = new Date(now.getTime() - 1000 * 60 * 60 * 24 * 3)
+  return start.getFullYear() + '-' + (start.getMonth() + 1) + '-' + start.getDate()
+}
+
 const getEndDate = () => {
-  const start = new Date(getStartDate())
+  const start = new Date(getNowDate())
   const end = new Date(start.getTime() + 1000 * 60 * 60 * 24 * 30)
   return end.getFullYear() + '-' + (end.getMonth() + 1) + '-' + end.getDate()
 }
-const getNowDate = () => getStartDate()
 
 export class ActivitieToken extends Component {
   constructor(props) {
@@ -109,7 +117,7 @@ export class ActivitieToken extends Component {
             style={{width: Dimensions.get("window").width - 70, height: 50, fontSize: 20}}
             value={this.state.token}
             onChangeText={(text) => this.setState({token: text})}
-            placeholder="Enter token here"
+            placeholder="Entrer son token"
             autoCorrect={false}
             autoCapitalize={'none'}
             keyboardType={'numeric'}
@@ -246,6 +254,10 @@ export default class EpiToken extends Component {
     return !rep.message}).catch(e => null)
   }
 
+  apiDatetoDate = (str) => {
+    return new Date(str.split(' ')[0] + "T" + str.split(' ')[1])
+  }
+
   loadActivities = () => {
    var data = new FormData();
    data.append("start", getStartDate())
@@ -260,13 +272,21 @@ export default class EpiToken extends Component {
     const myActivities = activitiesBrut.filter(act => (__DEV__) ? act.event_registered : act.event_registered === "registered")
     const out = sectionContent.map(e => [])
     const today = new Date(getNowDate())
+    myActivities.sort((a, b) => {
+      const dA = this.apiDatetoDate(a.start)
+      const dB = this.apiDatetoDate(b.start)
+      return dA.getTime() - dB.getTime()
+    })
     myActivities.forEach((act, id) => {
       const actDate = new Date(act.start.split(' ')[0])
       if (__DEV__ && Math.random() < 0.1)
         act.allow_token = true
       if (act.allow_token) {
         out[0].push(act)
-      } else if (actDate.getTime() - today.getTime() < 1000 * 60 * 60 * 24) {
+      } else if (actDate.getTime() < today.getTime()) {
+        // ignore it
+      }
+      else if (actDate.getTime() - today.getTime() < 1000 * 60 * 60 * 24) {
         out[1].push(act)
       } else if (actDate.getTime() - today.getTime() < 1000 * 60 * 60 * 24 * 2) {
         out[2].push(act)
@@ -356,7 +376,7 @@ export default class EpiToken extends Component {
             <View>
               <Text style={styles.activitieTitle}>There is no activities for you !</Text>
                 <Icon.Button name="refresh" backgroundColor="#3b5998" onPress={() => this.loadActivities()}>
-                  Refresh
+                  {"Reload the {INNOVATION.}"}
                 </Icon.Button>
             </View>
           : null
@@ -430,3 +450,13 @@ const styles = StyleSheet.create({
 });
 
 AppRegistry.registerComponent('EpiToken', () => EpiToken);
+
+//alerte activité
+//options :
+  //choisir temps entre alerte / desactiver
+  //theme
+  //deconexion
+//menu login plus beau
+//decouper en fichier
+
+//Inscriptions
