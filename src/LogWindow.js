@@ -8,7 +8,6 @@ import {
   StyleSheet,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'
-import Spinner from 'react-native-loading-spinner-overlay';
 import TextField from 'react-native-md-textinput';
 
 import logo from './resources/logo.png'
@@ -26,8 +25,12 @@ export default class LogWindow extends Component {
     if (this.props.tryToLogOnMount) {
       Keychain.getGenericPassword().then(credentials => {
         this.try_logIn(credentials.username, credentials.password)
-      }).catch(e => this.setState({loading: false}))
+      }).catch(e => {
+        this.setState({loading: false})
+        this.props.switchLoading(false)
+      })
     } else {
+      this.props.switchLoading(false)
       this.state.loading = false
     }
   }
@@ -54,9 +57,11 @@ export default class LogWindow extends Component {
       return this.logIn(log, pass).then(rep => {
         if (rep) {
           Keychain.setGenericPassword(log, pass)
+          this.props.switchLoading(true)
           this.props.logedIn()
           return true
         }
+        this.props.switchLoading(false)
         this.setState({loading: false})
         return false
       })
@@ -66,7 +71,6 @@ export default class LogWindow extends Component {
   render() {
     return (
       <View style={{flex: 1}}>
-        <Spinner visible={this.state.loading} />
         <View style={{flex: 2, margin: 5, padding: 5, backgroundColor: "white", elevation: 5, justifyContent: "flex-start"}}>
           <TextField label={'e-mail'} highlightColor={'#00BCD4'} 
             style={{width: Dimensions.get("window").width - 10}}

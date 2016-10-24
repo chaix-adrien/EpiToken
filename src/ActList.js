@@ -9,7 +9,6 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'
-import Spinner from 'react-native-loading-spinner-overlay';
 
 import {ActivitieToken, Activitie} from './Activitie.js'
 
@@ -92,6 +91,7 @@ export default class ActList extends Component {
         out[4].push(act)
       }
     })
+    this.props.switchLoading(false)
     this.setState({activities: out, refreshing: false})
    })
   }
@@ -142,7 +142,6 @@ export default class ActList extends Component {
     let listData = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2, sectionHeaderHasChanged: (r1, r2) => r1 !== r2})
     return (
       <View style={styles.container}>
-        <Spinner visible={this.state.refreshing} />
         {(this.state.activities.some(e => e.length)) ?
           <ListView
             refreshControl={<RefreshControl refreshing={this.state.refreshing} onRefresh={this.loadActivities}/>}
