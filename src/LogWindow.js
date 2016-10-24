@@ -4,10 +4,14 @@ import {
   Dimensions,
   TextInput,
   Alert,
+  Image,
+  StyleSheet,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'
 import Spinner from 'react-native-loading-spinner-overlay';
+import TextField from 'react-native-md-textinput';
 
+import logo from './resources/logo.png'
 const apiRoot = "https://intra.epitech.eu/"
 var Keychain = require('react-native-keychain');
 
@@ -61,33 +65,52 @@ export default class LogWindow extends Component {
 
   render() {
     return (
-      <View>
+      <View style={{flex: 1}}>
         <Spinner visible={this.state.loading} />
-        <TextInput
-          style={{width: Dimensions.get("window").width, height: 50}}
-          value={this.state.login}
-          onChangeText={(text) => this.setState({login: text})}
-          placeholder="e-mail"
-
-          autoCorrect={false}
-          autoCapitalize={'none'}
-          keyboardType={'email-address'}
-          onSubmitEditing={() => this.try_logIn(this.state.login, this.state.password)}
-       />
-        <TextInput
-          style={{width: Dimensions.get("window").width, height: 50}}
-          ref={(elem) => (this.passwordInput = elem)}
-          onChangeText={(text) => this.setState({password: text})}
-          placeholder="Password"
-          autoCorrect={false}
-          autoCapitalize={'none'}
-          secureTextEntry={true}
-          onSubmitEditing={() => this.try_logIn(this.state.login, this.state.password)}
+        <View style={{flex: 2, margin: 5, padding: 5, backgroundColor: "white", elevation: 5, justifyContent: "flex-start"}}>
+          <TextField label={'e-mail'} highlightColor={'#00BCD4'} 
+            style={{width: Dimensions.get("window").width - 10}}
+            value={this.state.login}
+            onChangeText={(text) => this.setState({login: text})}
+            autoCorrect={false}
+            autoCapitalize={'none'}
+            keyboardType={'email-address'}
+            onSubmitEditing={() => this.try_logIn(this.state.login, this.state.password)}
+          />
+          <TextField label={'Password'} highlightColor={'#00BCD4'} 
+            style={{width: Dimensions.get("window").width - 10}}
+            value={this.state.password}
+            ref={(elem) => (this.passwordInput = elem)}
+            onChangeText={(text) => this.setState({password: text})}
+            autoCorrect={false}
+            autoCapitalize={'none'}
+            secureTextEntry={true}
+            onSubmitEditing={() => this.try_logIn(this.state.login, this.state.password)}
+          />
+        </View>
+        <View
+          style={{margin: 10, backgroundColor: "white", elevation: 10, borderRadius: 5}}
+        >
+          <Icon.Button 
+          style={{elevation: 10}}
+          name="sign-in" backgroundColor="#2196f3" onPress={() => this.try_logIn()}>
+            Pick Up my Gauje
+          </Icon.Button>
+        </View>
+        <Image
+          style={styles.logo}
+          source={logo}
         />
-        <Icon.Button name="gear" backgroundColor="#3b5998" onPress={() => this.try_logIn()}>
-          Log In
-        </Icon.Button>
       </View>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  logo: {
+    width: null,
+    height: null,
+    flex: 4,
+    resizeMode:'contain',
+  }
+})
