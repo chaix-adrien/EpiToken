@@ -20,7 +20,7 @@ const sectionColor = ["#8bc34a", "#EF5350", "#81d4fa", "#81d4fa", "#81d4fa", "#8
 const getNowDate = () => {
   const start = new Date(Date.now())
   if (__DEV__)
-    return "2015-10-02T15:20:00"
+    return "2015-10-02T10:20:00"
   return start.toISOString()
 }
 
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 30,
     color: "black",
-    textShadowColor: "#01579b",
+    textShadowColor: "rgba(0, 0, 0, 100)",
     textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 5,
   },

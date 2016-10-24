@@ -30,7 +30,6 @@ export default class LogWindow extends Component {
         this.props.switchLoading(false)
       })
     } else {
-      this.props.switchLoading(false)
       this.state.loading = false
     }
   }
@@ -71,7 +70,7 @@ export default class LogWindow extends Component {
   render() {
     return (
       <View style={{flex: 1}}>
-        <View style={{flex: 2, margin: 5, padding: 5, backgroundColor: "white", elevation: 5, justifyContent: "flex-start"}}>
+        <View style={styles.inputView}>
           <TextField label={'e-mail'} highlightColor={'#00BCD4'} 
             style={{width: Dimensions.get("window").width - 10}}
             value={this.state.login}
@@ -116,5 +115,14 @@ const styles = StyleSheet.create({
     height: null,
     flex: 4,
     resizeMode:'contain',
-  }
+  },
+  inputView: {
+    height: 90,
+    flex: 2,
+    margin: 5,
+    padding: 5,
+    backgroundColor: "white",
+    elevation: 5,
+    justifyContent: "flex-start"
+  },
 })

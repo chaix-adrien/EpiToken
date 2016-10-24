@@ -51,11 +51,12 @@ export default class EpiToken extends Component {
    return fetch(apiRoot + "/logout?format=json", header).then(res => res.json()).catch(e => null)
   }
 
-  ActionButton = () => <ActionButton
+  ActionButton = () =>
+  <ActionButton
     icon={<Icon name="gear" style={styles.actionButtonIcon} size={20} color="white"/>}
     buttonColor="grey"
-    offsetX={10}
-    offsetY={0}
+    offsetX={-20}
+    offsetY={-30}
     style={{width: 10}}
     outRangeScale={0.8}
   >
@@ -77,7 +78,7 @@ export default class EpiToken extends Component {
   render() {
     return (
       <View style={styles.container}>
-        {!this.state.loged ? 
+        {!this.state.loged ?
           <LogWindow switchLoading={this.switchLoading} tryToLogOnMount={this.tryToLogOnMount} logedIn={this.logedIn}/>
           :
           <View style={styles.container}>
