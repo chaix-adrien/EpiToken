@@ -13,27 +13,27 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import {ActivitieToken, Activitie} from './Activitie.js'
 
 const apiRoot = "https://intra.epitech.eu/"
-const sectionContent = ["TOKEN", "Aujourd'hui", "Demain", "7 Jours", "30 Jours"]
+const sectionContent = ["MAINTENANT", "TOKEN", "Aujourd'hui", "Demain", "7 Jours", "30 Jours"]
 const sectionsID = sectionContent.map((s, id) => id)
-
+const sectionColor = ["#8bc34a", "#EF5350", "#81d4fa", "#81d4fa", "#81d4fa", "#81d4fa"]
 
 const getNowDate = () => {
   const start = new Date(Date.now())
   if (__DEV__)
-    return "2015-10-01"
-  return start.getFullYear() + '-' + (start.getMonth() + 1) + '-' + start.getDate()
+    return "2015-10-02T15:20:00"
+  return start.toISOString()
 }
 
 const getStartDate = () => {
   const now = new Date(getNowDate())
   const start = new Date(now.getTime() - 1000 * 60 * 60 * 24 * 3)
-  return start.getFullYear() + '-' + (start.getMonth() + 1) + '-' + start.getDate()
+  return start.toISOString()
 }
 
 const getEndDate = () => {
   const start = new Date(getNowDate())
   const end = new Date(start.getTime() + 1000 * 60 * 60 * 24 * 30)
-  return end.getFullYear() + '-' + (end.getMonth() + 1) + '-' + end.getDate()
+  return end.toISOString()
 }
 
 export default class ActList extends Component {
@@ -51,6 +51,15 @@ export default class ActList extends Component {
 
   apiDatetoDate = (str) => {
     return new Date(str.split(' ')[0] + "T" + str.split(' ')[1])
+  }
+
+  getDayDiff = (d1, d2) => {
+    if (d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate())
+      return 0
+    else if (d1.getFullYear() === d2.getFullYear() && d1.getMonth() == d2.getMonth())
+      return d1.getDate() - d2.getDate()
+    else
+      return Math.round((d1.getTime() - d2.getTime()) / (1000 * 60 * 60 * 24))
   }
 
   loadActivities = () => {
@@ -73,22 +82,24 @@ export default class ActList extends Component {
       return dA.getTime() - dB.getTime()
     })
     myActivities.forEach((act, id) => {
-      const actDate = new Date(act.start.split(' ')[0])
+      const actDate = new Date(act.start.split(' ')[0] + "T" + act.start.split(' ')[1])
+      const actDateEnd = new Date(act.end.split(' ')[0] + "T" + act.end.split(' ')[1])
       if (__DEV__ && Math.random() < 0.1)
         act.allow_token = true
-      if (act.allow_token) {
-        out[0].push(act)
+      if (today.getTime() < actDateEnd.getTime() && today.getTime() > actDate.getTime()) {
+        out[sectionContent.indexOf("MAINTENANT")].push(act)
+      } else if (act.allow_token) {
+        out[sectionContent.indexOf("TOKEN")].push(act)
       } else if (actDate.getTime() < today.getTime()) {
         // ignore it
-      }
-      else if (actDate.getTime() - today.getTime() < 1000 * 60 * 60 * 24) {
-        out[1].push(act)
-      } else if (actDate.getTime() - today.getTime() < 1000 * 60 * 60 * 24 * 2) {
-        out[2].push(act)
-      } else if (actDate.getTime() - today.getTime() < 1000 * 60 * 60 * 24 * 7) {
-        out[3].push(act)
+      } else if (this.getDayDiff(actDate, today) < 1) {
+        out[sectionContent.indexOf("Aujourd'hui")].push(act)
+      } else if (this.getDayDiff(actDate, today) < 2) {
+        out[sectionContent.indexOf("Demain")].push(act)
+      } else if (this.getDayDiff(actDate, today) < 7) {
+        out[sectionContent.indexOf("7 Jours")].push(act)
       } else {
-        out[4].push(act)
+        out[sectionContent.indexOf("30 Jours")].push(act)
       }
     })
     this.props.switchLoading(false)
@@ -148,8 +159,8 @@ export default class ActList extends Component {
             style={{width: Dimensions.get("window").width}}
             dataSource={listData.cloneWithRowsAndSections(this.state.activities, sectionsID)}
             enableEmptySections={true}
-            renderRow={(rowData, sid, id) => (sid === 0 ) ? <ActivitieToken sendToken={this.sendToken} activitie={rowData} />: <Activitie activitie={rowData} section={sid}/>}
-            renderSectionHeader={(data, id) => (data.length) ? <Text style={[styles.header, {backgroundColor: id ? "#81d4fa" : "#EF5350"}]}>{sectionContent[id]}</Text> : null}
+            renderRow={(rowData, sid, id) => (sid === sectionContent.indexOf("TOKEN") ) ? <ActivitieToken sendToken={this.sendToken} activitie={rowData} />: <Activitie activitie={rowData} section={sid}/>}
+            renderSectionHeader={(data, id) => (data.length) ? <Text style={[styles.header, {backgroundColor: sectionColor[id]}]}>{sectionContent[id]}</Text> : null}
           />
           :
           <View>
