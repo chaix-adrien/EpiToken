@@ -11,13 +11,13 @@ Visualisez vos activités a venir dans la journée, demain, dans la semaine et d
 ![Demo Android](https://github.com/chaix-adrien/EpiToken/blob/master/gifExample/calendar.gif)
 ----------
 
-## Entrez vos token simplement
+## Entrez vos tokens simplement
 Pas besoin d'aller zoomer sur la version "mobile" de l'intra, entrez vos token directement d'ans l'application.
 ![Demo Android](https://github.com/chaix-adrien/EpiToken/blob/master/gifExample/token.gif)
 ----------
 
 ## Recevez une alerte avant chaques activités
-Configurez la fréquences des notifications pour ne plus vous faire surprendre par les cours d'anglais a 12h30.
+Configurez la fréquences des notifications pour ne plus vous faire surprendre par les cours d'anglais à 12h30.
 ![Demo Android](https://github.com/chaix-adrien/EpiToken/blob/master/gifExample/notif.gif)
 
 
