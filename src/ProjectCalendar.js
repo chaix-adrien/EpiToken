@@ -8,6 +8,7 @@ import {
   Text,
   ListView,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import Grid from 'react-native-grid-component';
 import moment from 'moment';
@@ -22,13 +23,11 @@ export default class ProjectCalendar extends Component {
     this.state = {
       tasks: [],
       gridData: [],
+      loading: true,
     }
   }
 
   componentWillMount() {
-    this.props.switchLoading(false)
-    
-
     this.loadTask()
   }
 
@@ -95,7 +94,8 @@ export default class ProjectCalendar extends Component {
     fetch(apiRoot + "module/board/?format=json", header).then(res => res.json())
     .then(rep => {
       rep = rep.filter(t => t.registered)
-      this.setState({tasks: rep, gridData: this.taskToGridData(rep)}, () => this.forceUpdate())
+      this.props.switchLoading(false)
+      this.setState({loading: false, tasks: rep, gridData: this.taskToGridData(rep)}, () => this.forceUpdate())
     })
   }
 
@@ -129,22 +129,30 @@ export default class ProjectCalendar extends Component {
     return (
       <View style={{flexDirection: "row", flex: 1}}>
         <View style={{flex: 1, width: Dimensions.get("window").width - ((col) * 30 + 30 + col * 2), minWidth: Dimensions.get("window").width / 3}}>
-          <ListView
+          {this.state.loading ?
+            <ActivityIndicator animating={this.state.loading} style={[styles.centering, {height: 80}]} size="large" />
+            :
+            <ListView
             ref={e => (this.listTaskInfo = e)}
             dataSource={listData.cloneWithRows(this.state.tasks)}
             enableEmptySections={true}
             renderRow={(rowData, sid, id) => this.taskInfos(rowData, id)}
           />
+        }
         </View>
         <View style={{width: (col) * 30 + 30 + col * 2,
           maxWidth: (Dimensions.get("window").width / 3) * 2,
           borderLeftWidth: 2, borderColor: "black", elevation: 20, backgroundColor: "#EEEEEE"}}>
-          <Grid
-            style={{flex: 1}}
-            renderItem={(data, i) => this.drawGridDay(data, i)}
-            data={this.state.gridData}
-            itemsPerRow={col}
-          />
+          {this.state.loading ?
+            <ActivityIndicator animating={this.state.loading} style={[styles.centering, {height: 80}]} size="large" />
+            :
+            <Grid
+              style={{flex: 1}}
+              renderItem={(data, i) => this.drawGridDay(data, i)}
+              data={this.state.gridData}
+              itemsPerRow={col}
+            />
+          }
         </View>
       </View>
     );
