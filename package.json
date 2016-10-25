@@ -15,7 +15,6 @@
     "react-native-grid-component": "^1.0.0",
     "react-native-keychain": "^0.3.2",
     "react-native-loader": "^1.1.0",
-    "react-native-md-textinput": "^2.0.4",
     "react-native-popover": "git+https://github.com/jeanregisser/react-native-popover.git",
     "react-native-push-notification": "^2.1.1",
     "react-native-scrollable-tab-view": "skv-headless/react-native-scrollable-tab-view.git",

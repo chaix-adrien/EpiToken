@@ -8,7 +8,6 @@ import {
   StyleSheet,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'
-import TextField from 'react-native-md-textinput';
 
 import logo from './resources/logo.png'
 const apiRoot = "https://intra.epitech.eu/"
@@ -71,7 +70,7 @@ export default class LogWindow extends Component {
     return (
       <View style={{flex: 1}}>
         <View style={styles.inputView}>
-          <TextField label={'e-mail'} highlightColor={'#00BCD4'} 
+          <TextInput placeholder='e-mail'
             style={{width: Dimensions.get("window").width - 10}}
             value={this.state.login}
             onChangeText={(text) => this.setState({login: text})}
@@ -80,7 +79,7 @@ export default class LogWindow extends Component {
             keyboardType={'email-address'}
             onSubmitEditing={() => this.try_logIn(this.state.login, this.state.password)}
           />
-          <TextField label={'Password'} highlightColor={'#00BCD4'} 
+          <TextInput placeholder='Password'
             style={{width: Dimensions.get("window").width - 10}}
             value={this.state.password}
             ref={(elem) => (this.passwordInput = elem)}
@@ -123,6 +122,6 @@ const styles = StyleSheet.create({
     padding: 5,
     backgroundColor: "white",
     elevation: 5,
-    justifyContent: "flex-start"
+    justifyContent: "space-around"
   },
 })
