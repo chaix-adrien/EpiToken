@@ -19,7 +19,9 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import {DoubleBounce} from 'react-native-loader';
 import PushNotification from 'react-native-push-notification';
 import Popover from 'react-native-popover';
+import ScrollableTabView from 'react-native-scrollable-tab-view';
 
+import ProjectCalendar from './src/ProjectCalendar.js'
 import NotificationsOptions from './src/NotificationsOptions.js'
 import LogWindow from './src/LogWindow.js'
 import ActList from './src/ActList.js'
@@ -59,6 +61,7 @@ export default class EpiToken extends Component {
       notificationActive: true,
       notificationActiveTime: notifTimes.map(t => t.default),
       displayNotifOption: false,
+      currentView: 0,
     }
     this.loadedAct = []
     this.tryToLogOnMount = true
@@ -89,6 +92,7 @@ export default class EpiToken extends Component {
   }
 
   switchLoading = (to) => {
+    console.log("switch ")
     this.setState({loading: to})
   }
 
@@ -183,10 +187,13 @@ export default class EpiToken extends Component {
         icon={<Icon name="gear" size={20} color="white"/>}
         buttonColor="grey"
         offsetX={-20}
-        offsetY={-30}
+        offsetY={-36}
         style={{width: 10}}
         outRangeScale={0.8}
       >
+        <ActionButton.Item buttonColor='#03a9f4' title={!this.state.currentView ? "Projets" : "Activités"} onPress={() => this.setState({currentView: this.state.currentView ? 0 : 1})}>
+          <Icon name={!this.state.currentView ? "code-fork" : "calendar"} size={30}/>
+        </ActionButton.Item>
         <ActionButton.Item buttonColor='#cddc39' title="Notifications" onPress={() => this.setState({displayNotifOption: true})}>
           <Icon name="bell" size={30}/>
         </ActionButton.Item>
@@ -222,7 +229,15 @@ export default class EpiToken extends Component {
     else
       return (
         <View style={styles.container}>
-          <ActList activeNotification={this.activeNotification} switchLoading={this.switchLoading} />
+          <ScrollableTabView
+          renderTabBar={() => <View/>}
+          scrollOffset={400}
+          locked={true}
+          page={this.state.currentView}
+          >
+            <ActList tabLabel="Activités" activeNotification={this.activeNotification} switchLoading={this.switchLoading} />
+            <ProjectCalendar tabLabel="Projets" switchLoading={this.switchLoading} />
+          </ScrollableTabView>
         </View>
       )
   }

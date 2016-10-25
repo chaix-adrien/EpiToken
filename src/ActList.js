@@ -114,6 +114,9 @@ export default class ActList extends Component {
     myActivities.forEach((act, id) => {
       const actDate = new Date(act.start.split(' ')[0] + "T" + act.start.split(' ')[1])
       const actDateEnd = new Date(act.end.split(' ')[0] + "T" + act.end.split(' ')[1])
+      if (__DEV__ && Math.random() < 0.1) {
+        act.allow_token = true
+      }
       if (today.getTime() < actDateEnd.getTime() && today.getTime() > actDate.getTime()) {
         out[sectionContent.indexOf("MAINTENANT")].push(act)
       } else if (act.allow_token) {
@@ -214,6 +217,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flex: 1,
+    borderRadius: 5,
     padding: 5,
     elevation: 20,
     fontWeight: "bold",
