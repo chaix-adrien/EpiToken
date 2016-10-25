@@ -12,6 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome'
 
 import {ActivitieToken, Activitie} from './Activitie.js'
+import {apiToDate} from '../index.android.js'
 
 const apiRoot = "https://intra.epitech.eu/"
 const sectionContent = ["MAINTENANT", "TOKEN", "Aujourd'hui", "Demain", "7 Jours", "30 Jours"]
@@ -50,9 +51,6 @@ export default class ActList extends Component {
     this.loadActivities()
   }
 
-  apiDatetoDate = (str) => {
-    return new Date(str.split(' ')[0] + "T" + str.split(' ')[1])
-  }
 
   getDayDiff = (d1, d2) => {
     if (d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate())
@@ -65,7 +63,7 @@ export default class ActList extends Component {
 
 
   setNotification = (act, minBefore) => {
-    if (this.apiDatetoDate(act.start).getTime() - 1000 * 60 * minBefore > Date.now()) {
+    if (apiToDate(act.start).getTime() - 1000 * 60 * minBefore > Date.now()) {
       PushNotification.localNotificationSchedule({
           largeIcon: "ic_launcher",
           smallIcon: "ic_launcher",
@@ -76,7 +74,7 @@ export default class ActList extends Component {
           color: this.minToColor(minBefore),
           playSound: true,
           soundName: 'default',
-          date: new Date(this.apiDatetoDate(act.start).getTime() - 1000 * 60 * minBefore),
+          date: new Date(apiToDate(act.start).getTime() - 1000 * 60 * minBefore),
       });
     }
   }
@@ -107,13 +105,13 @@ export default class ActList extends Component {
     const out = sectionContent.map(e => [])
     const today = new Date(getNowDate())
     myActivities.sort((a, b) => {
-      const dA = this.apiDatetoDate(a.start)
-      const dB = this.apiDatetoDate(b.start)
+      const dA = apiToDate(a.start)
+      const dB = apiToDate(b.start)
       return dA.getTime() - dB.getTime()
     })
     myActivities.forEach((act, id) => {
-      const actDate = new Date(act.start.split(' ')[0] + "T" + act.start.split(' ')[1])
-      const actDateEnd = new Date(act.end.split(' ')[0] + "T" + act.end.split(' ')[1])
+      const actDate = apiToDate(act.start)
+      const actDateEnd = apiToDate(act.end)
       if (__DEV__ && Math.random() < 0.1) {
         act.allow_token = true
       }

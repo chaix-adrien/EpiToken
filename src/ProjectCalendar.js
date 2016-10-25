@@ -6,10 +6,15 @@ import {
   Dimensions,
   AsyncStorage,
   Text,
+  ListView,
+  TouchableOpacity,
 } from 'react-native';
 import Grid from 'react-native-grid-component';
-const apiRoot = "https://intra.epitech.eu/"
+import moment from 'moment';
+import {apiToDate} from '../index.android.js'
 
+const apiRoot = "https://intra.epitech.eu/"
+const taskInfosHeight = 120
 
 export default class ProjectCalendar extends Component {
   constructor(props) {
@@ -68,7 +73,7 @@ export default class ProjectCalendar extends Component {
           out.push({
             type: "task",
             task: t,
-            style: {backgroundColor: `hsl(${40 * id}, 70%, 50%)` , borderRadius: 2}
+            style: {backgroundColor: `hsl(${60 * id}, 70%, 50%)` , borderRadius: 2}
           })
         } else {
           out.push({type: "none"})
@@ -89,7 +94,7 @@ export default class ProjectCalendar extends Component {
     }
     fetch(apiRoot + "module/board/?format=json", header).then(res => res.json())
     .then(rep => {
-      rep = rep.slice(1)
+      rep = rep.filter(t => t.registered)
       this.setState({tasks: rep, gridData: this.taskToGridData(rep)}, () => this.forceUpdate())
     })
   }
@@ -98,18 +103,38 @@ export default class ProjectCalendar extends Component {
     if (data.type === "date") {
       return <Text key={id} style={[data.style, styles.item, styles.itemDate]}>{data.display}</Text>
     } else if (data.type === "task") {
-      return <View style={[data.style, styles.item]} key={id}/>
+      return <TouchableOpacity style={[data.style, styles.item]} key={id} onPress={() => this.listTaskInfo.scrollTo({y: taskInfosHeight * (id - 1)})}/>
     } else {
       return <View style={[{backgroundColor: "transparent", borderBottomWidth: 1, borderColor: "grey"}, styles.item]} key={id}/>
     }
   }
 
+  taskInfos = (task, id) => {
+    const s = apiToDate(task.begin_acti)
+    const e = apiToDate(task.end_acti)
+    return (
+      <View style={{height: taskInfosHeight}}>
+        <View style={{height: 20, elevation: 5, borderTopLeftRadius: 10, borderTopRightRadius: 10, backgroundColor: `hsl(${60 * id}, 70%, 50%)`}} />
+        <Text style={styles.infoTitle}>{task.acti_title}</Text>
+        <Text style={{marginLeft: 5}}>{task.title_module}</Text>
+        <Text style={styles.infoDates}>Debut: {moment(s).format('DD/MM/YYYY')}</Text>
+        <Text style={styles.infoDates}>Fin: {moment(e).format('DD/MM/YYYY-hh:mm')}</Text>
+      </View>
+    )
+  }
+
   render() {
+    let listData = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
     const col = (this.state.tasks.length) ? this.state.tasks.length + 1: 1
     return (
       <View style={{flexDirection: "row", flex: 1}}>
-        <View style={{flex: 1, width: Dimensions.get("window").width / 3}}>
-          <Text>SLT</Text>
+        <View style={{flex: 1, width: Dimensions.get("window").width - ((col) * 30 + 30 + col * 2), minWidth: Dimensions.get("window").width / 3}}>
+          <ListView
+            ref={e => (this.listTaskInfo = e)}
+            dataSource={listData.cloneWithRows(this.state.tasks)}
+            enableEmptySections={true}
+            renderRow={(rowData, sid, id) => this.taskInfos(rowData, id)}
+          />
         </View>
         <View style={{width: (col) * 30 + 30 + col * 2,
           maxWidth: (Dimensions.get("window").width / 3) * 2,
@@ -140,8 +165,21 @@ const styles = StyleSheet.create({
     width: 30,
     fontSize: 17,
     borderColor: "grey",
+  },
+  infoTitle: {
+    color: "black",
+    fontWeight: "bold",
+    fontSize: 20,
+    marginLeft: 5,
+  },
+  infoDates: {
+    color: "black",
+    fontWeight: "bold",
+    fontSize: 15,
+    marginLeft: 5,
   }
 });
 
 //si pas de data
 //clique sur event
+//Verifier les champs pour voir si tout les projet recu sont viable

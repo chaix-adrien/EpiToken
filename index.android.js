@@ -27,6 +27,12 @@ import LogWindow from './src/LogWindow.js'
 import ActList from './src/ActList.js'
 const apiRoot = "https://intra.epitech.eu/"
 
+export const apiToDate = (str) => {
+  d = str.split(" ")[0]
+  h = str.split(" ")[1]
+  return new Date(d.split('-')[0], d.split('-')[1] - 1, d.split('-')[2], ...h.split(":"), 0)
+}
+
 export const notifTimes = [
   {
     name: "5 min",
@@ -92,7 +98,6 @@ export default class EpiToken extends Component {
   }
 
   switchLoading = (to) => {
-    console.log("switch ")
     this.setState({loading: to})
   }
 
@@ -105,10 +110,6 @@ export default class EpiToken extends Component {
    Keychain.setGenericPassword("UNDEFINED", "UNDEFINED")
    this.setState({loged: false})
    return fetch(apiRoot + "/logout?format=json", header).then(res => res.json()).catch(e => null)
-  }
-
-  apiDatetoDate = (str) => {
-    return new Date(str.split(' ')[0] + "T" + str.split(' ')[1])
   }
 
   getTokenLink = (act) => {
@@ -146,7 +147,7 @@ export default class EpiToken extends Component {
     }
     let room = act.room.code.split('/')
     room = room[room.length - 1]
-    if (this.apiDatetoDate(act.start).getTime() - 1000 * 60 * minBefore > Date.now()) {
+    if (apiToDate(act.start).getTime() - 1000 * 60 * minBefore > Date.now()) {
       PushNotification.localNotificationSchedule({
           largeIcon: "ic_launcher",
           smallIcon: "ic_launcher",
@@ -156,7 +157,7 @@ export default class EpiToken extends Component {
           color: minToColor(minBefore),
           playSound: true,
           soundName: 'default',
-          date: new Date(this.apiDatetoDate(act.start).getTime() - 1000 * 60 * minBefore),
+          date: new Date(apiToDate(act.start).getTime() - 1000 * 60 * minBefore),
       });
     }
   }
