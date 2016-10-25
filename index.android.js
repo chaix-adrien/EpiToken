@@ -140,14 +140,15 @@ export default class EpiToken extends Component {
       else if (min > 5) return "#ffc107"
       else return "#d50000"
     }
+    let room = act.room.code.split('/')
+    room = room[room.length - 1]
     if (this.apiDatetoDate(act.start).getTime() - 1000 * 60 * minBefore > Date.now()) {
       PushNotification.localNotificationSchedule({
           largeIcon: "ic_launcher",
           smallIcon: "ic_launcher",
-          bigText: "My big text that will be shown when notification is expanded",
           vibrate: true,
           title: act.acti_title,
-          message: "My Notification Message",
+          message: room + "  " + act.start.split(' ')[1].split(':').slice(0, 2).join(':') + " -> " + act.end.split(' ')[1].split(':').slice(0, 2).join(':'),
           color: minToColor(minBefore),
           playSound: true,
           soundName: 'default',
@@ -274,9 +275,6 @@ const styles = StyleSheet.create({
 AppRegistry.registerComponent('EpiToken', () => EpiToken);
 
 
-//alerte activité
 //options :
-  //choisir temps entre alerte / desactiver
   //theme
-
 //Inscriptions
