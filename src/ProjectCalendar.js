@@ -181,5 +181,4 @@ const styles = StyleSheet.create({
 });
 
 //si pas de data
-//clique sur event
 //Verifier les champs pour voir si tout les projet recu sont viable

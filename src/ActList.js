@@ -194,7 +194,7 @@ export default class ActList extends Component {
           />
           :
           <View style={{width: Dimensions.get("window").width, margin: 10, padding: 10}}>
-            <Text style={styles.activitieTitle}>There is no activities for you !</Text>
+            <Text style={styles.activitieTitle}>There are activities for you !</Text>
               <Icon.Button name="refresh" backgroundColor="#3b5998" onPress={() => this.loadActivities()}>
                 {"Reload the {INNOVATION.}"}
               </Icon.Button>

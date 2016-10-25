@@ -95,7 +95,7 @@ export default class LogWindow extends Component {
         >
           <Icon.Button 
           style={{elevation: 10}}
-          name="sign-in" backgroundColor="#2196f3" onPress={() => this.try_logIn()}>
+          name="sign-in" backgroundColor="#2196f3" onPress={() => this.try_logIn(this.state.login, this.state.password)}>
             Pick Up my Gauje
           </Icon.Button>
         </View>
