@@ -82,6 +82,10 @@ export default class ProjectCalendar extends Component {
     }
     fetch(apiRoot + "module/board/?format=json", header).then(res => res.json())
     .then(rep => {
+      if (!rep.length) {
+        this.setState({loading: false})
+        return
+      }
       rep = rep.filter(t => t.registered)
       this.setState({loading: false, tasks: rep, gridData: this.taskToGridData(rep)}, () => this.forceUpdate())
     })
@@ -111,9 +115,17 @@ export default class ProjectCalendar extends Component {
     )
   }
 
-  render() {
+  getProjectView = (col) => {
+    if (!col) {
+      return (
+        <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
+          <View style={{height: 12}} />
+          <Text style={{fontSize: 25, fontWeight: "bold"}}>Aucun projet en cours.</Text>
+          <Text style={{fontStyle: 'italic'}}>Tu peux réinstaller Hearthstone !</Text>
+        </View>
+      )
+    }
     let listData = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
-    const col = (this.state.tasks.length) ? this.state.tasks.length + 1: 1
     return (
       <View style={{flexDirection: "row", flex: 1}}>
         <View style={{flex: 1, width: Dimensions.get("window").width - ((col) * 30 + 30 + col * 2), minWidth: Dimensions.get("window").width / 3}}>
@@ -145,7 +157,12 @@ export default class ProjectCalendar extends Component {
           }
         </View>
       </View>
-    );
+    )
+  }
+
+  render() {
+    const col = (this.state.tasks.length) ? this.state.tasks.length + 1: 0
+    return this.getProjectView(col);
   }
 }
 

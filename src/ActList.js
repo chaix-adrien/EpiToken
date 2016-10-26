@@ -192,12 +192,8 @@ export default class ActList extends Component {
           />
           :
           <View style={{flex: 1, width: Dimensions.get("window").width, margin: 10, padding: 10, alignItems: 'center', justifyContent: "center"}}>
-            <Text style={styles.noActivities}>There are no activities for you !</Text>
-              <View style={styles.noActivitiesButton}>
-                <Icon.Button name="refresh" color="grey" backgroundColor="#b3d4fc" onPress={() => this.loadActivities()}>
-                  <Text style={{fontSize: 20}}>{"Reload the {INNOVATION.}"}</Text>
-                </Icon.Button>
-              </View>
+            <Text style={{fontSize: 25, fontWeight: "bold"}}>Aucune activité en cours.</Text>
+            <Text style={{fontStyle: 'italic'}}>Ah, la tek 3 ...</Text>
           </View>
         }
       </View>
