@@ -191,11 +191,13 @@ export default class ActList extends Component {
             renderSectionHeader={(data, id) => (data.length) ? <Text style={[styles.header, {backgroundColor: sectionColor[id]}]}>{sectionContent[id]}</Text> : null}
           />
           :
-          <View style={{width: Dimensions.get("window").width, margin: 10, padding: 10}}>
-            <Text style={styles.activitieTitle}>There are activities for you !</Text>
-              <Icon.Button name="refresh" backgroundColor="#3b5998" onPress={() => this.loadActivities()}>
-                {"Reload the {INNOVATION.}"}
-              </Icon.Button>
+          <View style={{flex: 1, width: Dimensions.get("window").width, margin: 10, padding: 10, alignItems: 'center', justifyContent: "center"}}>
+            <Text style={styles.noActivities}>There are no activities for you !</Text>
+              <View style={styles.noActivitiesButton}>
+                <Icon.Button name="refresh" color="grey" backgroundColor="#b3d4fc" onPress={() => this.loadActivities()}>
+                  <Text style={{fontSize: 20}}>{"Reload the {INNOVATION.}"}</Text>
+                </Icon.Button>
+              </View>
           </View>
         }
       </View>
@@ -223,4 +225,13 @@ const styles = StyleSheet.create({
     textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 5,
   },
+  noActivities: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    margin: 20,
+  },
+  noActivitiesButton: {
+    padding: 20,
+  }
 });
