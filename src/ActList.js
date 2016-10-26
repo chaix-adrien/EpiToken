@@ -130,8 +130,7 @@ export default class ActList extends Component {
       }
     })
     this.props.activeNotification(myActivities)
-    this.props.switchLoading(false)
-    this.setState({activities: out, refreshing: false})
+    this.setState({activities: out, refreshing: false}, () => this.props.switchLoading(false))
    })
   }
 
@@ -181,6 +180,7 @@ export default class ActList extends Component {
     let listData = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2, sectionHeaderHasChanged: (r1, r2) => r1 !== r2})
     return (
       <View style={styles.container}>
+        <View style={{height: 12}} />
         {(this.state.activities.some(e => e.length)) ?
           <ListView
             refreshControl={<RefreshControl refreshing={this.state.refreshing} onRefresh={this.loadActivities}/>}

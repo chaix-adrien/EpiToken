@@ -240,7 +240,7 @@ export default class EpiToken extends Component {
     else
       return (
         <View style={styles.container}>
-          <Swiper showsButtons={false}>
+          <Swiper showsButtons={false} pageMargin={10} loop={false}>
             <ActList tabLabel="Activités" activeNotification={this.activeNotification} switchWaiting={this.switchWaiting} switchLoading={this.switchLoading} />
             <ProjectCalendar tabLabel="Projets" switchWaiting={this.switchWaiting} switchLoading={this.switchLoading} />
           </Swiper>

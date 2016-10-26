@@ -117,6 +117,7 @@ export default class ProjectCalendar extends Component {
     return (
       <View style={{flexDirection: "row", flex: 1}}>
         <View style={{flex: 1, width: Dimensions.get("window").width - ((col) * 30 + 30 + col * 2), minWidth: Dimensions.get("window").width / 3}}>
+          <View style={{height: 12}} />
           {this.state.loading ?
             <ActivityIndicator animating={this.state.loading} style={[styles.centering, {height: 80}]} size="large" />
             :
@@ -131,6 +132,7 @@ export default class ProjectCalendar extends Component {
         <View style={{width: (col) * 30 + 30 + col * 2,
           maxWidth: (Dimensions.get("window").width / 3) * 2,
           borderLeftWidth: 2, borderColor: "black", elevation: 20, backgroundColor: "#EEEEEE"}}>
+          <View style={{height: 12}} />
           {this.state.loading ?
             <ActivityIndicator animating={this.state.loading} style={[styles.centering, {height: 80}]} size="large" />
             :
