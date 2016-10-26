@@ -83,7 +83,6 @@ export default class ProjectCalendar extends Component {
     fetch(apiRoot + "module/board/?format=json", header).then(res => res.json())
     .then(rep => {
       rep = rep.filter(t => t.registered)
-      this.props.switchLoading(false)
       this.setState({loading: false, tasks: rep, gridData: this.taskToGridData(rep)}, () => this.forceUpdate())
     })
   }

@@ -22,10 +22,6 @@ export default class NotificationsOptions extends Component {
     }
   }
 
-  componentWillMount() {
-    this.props.switchLoading(false)
-  }
-
   render() {
     return (
       <View style={styles.container}>
