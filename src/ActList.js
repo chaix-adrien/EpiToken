@@ -112,13 +112,11 @@ export default class ActList extends Component {
     myActivities.forEach((act, id) => {
       const actDate = apiToDate(act.start)
       const actDateEnd = apiToDate(act.end)
-      if (__DEV__ && Math.random() < 0.1) {
-        act.allow_token = true
+      if (act.allow_token) {
+        out[sectionContent.indexOf("TOKEN")].push(act)
       }
       if (today.getTime() < actDateEnd.getTime() && today.getTime() > actDate.getTime()) {
         out[sectionContent.indexOf("MAINTENANT")].push(act)
-      } else if (act.allow_token) {
-        out[sectionContent.indexOf("TOKEN")].push(act)
       } else if (actDate.getTime() < today.getTime()) {
         // ignore it
       } else if (this.getDayDiff(actDate, today) < 1) {
@@ -141,11 +139,11 @@ export default class ActList extends Component {
     return `${apiRoot}/module/${act.scolaryear}/${act.codemodule}/${act.codeinstance}/${act.codeacti}/${act.codeevent}/token?format=json`
   }
 
-  deleteActivitie = (acts, act) => {
+  deleteTokenActivitie = (acts, act) => {
     let out = JSON.parse(JSON.stringify(acts))
     const actStr = this.getTokenLink(act)
-    out = out.map((part) => {
-      if (!part || !part.length) return part
+    out = out.map((part, id) => {
+      if (!part || !part.length || id !== sectionContent.indexOf("TOKEN")) return part
       for (let i = 0; i < part.length; i++) {
         if (actStr === this.getTokenLink(part[i])) {
           part = part.slice(0, i).concat(part.slice(i + 1, part.length))
@@ -173,7 +171,7 @@ export default class ActList extends Component {
         Alert.alert("Mauvais token:", rep.error)
         return false
       } else {
-        this.setState({activities: this.deleteActivitie(this.state.activities, act)})
+        this.setState({activities: this.deleteTokenActivitie(this.state.activities, act)})
         return true
       }
     })
