@@ -51,14 +51,17 @@ export default class LogWindow extends Component {
   }
 
   try_logIn = (log, pass) => {
+    this.props.switchWaiting(true)
     return this.setState({loading: true}, () => {
       return this.logIn(log, pass).then(rep => {
         if (rep) {
           Keychain.setGenericPassword(log, pass)
+          this.props.switchWaiting(false)
           this.props.switchLoading(true)
           this.props.logedIn()
           return true
         }
+        this.props.switchWaiting(false)
         this.props.switchLoading(false)
         this.setState({loading: false})
         return false

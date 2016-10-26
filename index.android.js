@@ -64,6 +64,7 @@ export default class EpiToken extends Component {
       mounted: false,
       loged: false,
       loading: true,
+      waiting: false,
       notificationActive: true,
       notificationActiveTime: notifTimes.map(t => t.default),
       displayNotifOption: false,
@@ -99,6 +100,10 @@ export default class EpiToken extends Component {
 
   switchLoading = (to) => {
     this.setState({loading: to})
+  }
+
+  switchWaiting = (to) => {
+    this.setState({waiting: to})
   }
 
   logOut = () => {
@@ -214,10 +219,19 @@ export default class EpiToken extends Component {
       </View>
     )
   }
+  displayWaitingScreen = () => {
+    if (!this.state.waiting || this.state.loading) return null
+    return (
+      <View style={[styles.loading, {backgroundColor: "transparent"}]}>
+        <DoubleBounce size={100} color="#b3d4fc" />
+        <Text style={{color: "white", fontStyle: "italic", marginTop: 5}}>Waiting for Awesomeness</Text>
+      </View>
+    )
+  }
 
   getCurrentView = () => {
     if (!this.state.loged)
-      return <LogWindow switchLoading={this.switchLoading} tryToLogOnMount={this.tryToLogOnMount} logedIn={this.logedIn}/>
+      return <LogWindow switchWaiting={this.switchWaiting} switchLoading={this.switchLoading} tryToLogOnMount={this.tryToLogOnMount} logedIn={this.logedIn}/>
     else if (this.state.displayNotifOption && false)
       return <NotificationsOptions
     activeTime={this.state.notificationActiveTime}
@@ -236,8 +250,8 @@ export default class EpiToken extends Component {
           locked={true}
           page={this.state.currentView}
           >
-            <ActList tabLabel="Activités" activeNotification={this.activeNotification} switchLoading={this.switchLoading} />
-            <ProjectCalendar tabLabel="Projets" switchLoading={this.switchLoading} />
+            <ActList tabLabel="Activités" activeNotification={this.activeNotification} switchWaiting={this.switchWaiting} switchLoading={this.switchLoading} />
+            <ProjectCalendar tabLabel="Projets" switchWaiting={this.switchWaiting} switchLoading={this.switchLoading} />
           </ScrollableTabView>
         </View>
       )
@@ -249,6 +263,7 @@ export default class EpiToken extends Component {
         {this.getCurrentView()}
         {this.ActionButton()}
         {this.displayLoadingScreen()}
+        {this.displayWaitingScreen()}
         <Popover
           placement="bottom"
           fromRect={{x: Dimensions.get('window').width / 2, y: Dimensions.get('window').height / 6, width: 0, height: 0}}
