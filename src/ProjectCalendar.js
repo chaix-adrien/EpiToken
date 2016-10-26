@@ -116,6 +116,7 @@ export default class ProjectCalendar extends Component {
     return (
       <ScrollView style={{height: taskInfosHeight, backgroundColor: `hsl(${60 * id}, 70%, 95%)`, borderRadius: 10}}>
         <View style={{height: 20, elevation: 5, borderTopLeftRadius: 10, borderTopRightRadius: 10, backgroundColor: `hsl(${60 * id}, 70%, 50%)`}} />
+        <View style={{height: 20, elevation: 5, top: -20, borderTopLeftRadius: 10, backgroundColor: `hsl(${60 * id}, 70%, 80%)`}} />
         <Text style={styles.infoTitle}>{task.acti_title}</Text>
         <Text style={{marginLeft: 5}}>{task.title_module}</Text>
         <Text style={styles.infoDates}>Debut: {"\n"}{moment(s).format('DD/MM/YYYY')}</Text>
