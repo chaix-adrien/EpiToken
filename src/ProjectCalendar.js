@@ -15,7 +15,7 @@ import moment from 'moment';
 import {apiToDate} from '../index.android.js'
 
 const apiRoot = "https://intra.epitech.eu/"
-const taskInfosHeight = 120
+const taskInfosHeight = 180
 
 export default class ProjectCalendar extends Component {
   constructor(props) {
@@ -34,25 +34,15 @@ export default class ProjectCalendar extends Component {
   taskToGridData = (tasks) => {
     let lastTaskDate = new Date(Date.now())
     tasks.forEach(t => {
-      const tDate = new Date(t.end_acti.split(' ')[0] + 'T' + t.end_acti.split(' ')[1])
+      const tDate = apiToDate(t.end_acti)
       if (tDate.getTime() > lastTaskDate.getTime()) lastTaskDate = tDate
     })
     let firstTaskDate = new Date(Date.now())
     firstTaskDate = new Date(firstTaskDate.getFullYear(), firstTaskDate.getMonth(), firstTaskDate.getDate(), 0, 0, 0, 0)
     lastTaskDate = new Date(lastTaskDate.getFullYear(), lastTaskDate.getMonth(), lastTaskDate.getDate(), 0, 0, 0, 0)
     const out = []
-    let first = true
-    for (d = d = new Date(firstTaskDate.getFullYear(), firstTaskDate.getMonth(), firstTaskDate.getDate() - 1, 0, 0, 0, 0); d.getTime() <= lastTaskDate.getTime(); d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1, 0, 0, 0, 0)) {
+    for (d = d = new Date(firstTaskDate.getFullYear(), firstTaskDate.getMonth(), firstTaskDate.getDate(), 0, 0, 0, 0); d.getTime() <= lastTaskDate.getTime(); d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1, 0, 0, 0, 0)) {
       const day = d.getDay()
-      if (first) {
-        out.push({
-          type: "date",
-          date: d,
-          display: "",
-          style: {backgroundColor: "transparent", height: 0, width: 0}
-        })
-        first = false
-      } else {
         out.push({
           type: "date",
           date: d,
@@ -62,7 +52,6 @@ export default class ProjectCalendar extends Component {
             borderBottomWidth: (day === 0) ? 1 : 0,
           }
         })
-      }
       tasks.forEach((t, id) => {
         const s = new Date(t.begin_acti.split(' ')[0] + "T00:00:00")
         s.setHours(0)
@@ -113,12 +102,12 @@ export default class ProjectCalendar extends Component {
     const s = apiToDate(task.begin_acti)
     const e = apiToDate(task.end_acti)
     return (
-      <View style={{height: taskInfosHeight}}>
+      <View style={{height: taskInfosHeight, backgroundColor: `hsl(${60 * id}, 70%, 95%)`, borderRadius: 10}}>
         <View style={{height: 20, elevation: 5, borderTopLeftRadius: 10, borderTopRightRadius: 10, backgroundColor: `hsl(${60 * id}, 70%, 50%)`}} />
         <Text style={styles.infoTitle}>{task.acti_title}</Text>
         <Text style={{marginLeft: 5}}>{task.title_module}</Text>
-        <Text style={styles.infoDates}>Debut: {moment(s).format('DD/MM/YYYY')}</Text>
-        <Text style={styles.infoDates}>Fin: {moment(e).format('DD/MM/YYYY-hh:mm')}</Text>
+        <Text style={styles.infoDates}>Debut: {"\n"}{moment(s).format('DD/MM/YYYY')}</Text>
+        <Text style={styles.infoDates}>Fin: {"\n"}{moment(e).format('DD/MM/YYYY-hh:mm')}</Text>
       </View>
     )
   }
