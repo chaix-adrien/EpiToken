@@ -38,6 +38,7 @@ export default class LogWindow extends Component {
     var data = new FormData();
     data.append("login", log)
     data.append("password", pass)
+    data.append("remind", "on")
     const header = {
       method: "POST",
       body: data

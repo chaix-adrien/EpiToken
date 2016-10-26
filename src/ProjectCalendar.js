@@ -8,6 +8,8 @@ import {
   Text,
   ListView,
   TouchableOpacity,
+  Linking,
+  ScrollView,
   ActivityIndicator,
 } from 'react-native';
 import Grid from 'react-native-grid-component';
@@ -71,6 +73,10 @@ export default class ProjectCalendar extends Component {
     return out
   }
 
+  getFileUrl = (t) => `${apiRoot}module/${t.scolaryear}/${t.codemodule}/${t.codeinstance}/${t.codeacti}/project/file/?format=json`
+
+  loadFiles = (tasks) => Promise.all(tasks.map(t => fetch(this.getFileUrl(t)).then(r => r.json())))
+
   loadTask = () => {
     const today = new Date(Date.now())
     var data = new FormData();
@@ -87,7 +93,10 @@ export default class ProjectCalendar extends Component {
         return
       }
       rep = rep.filter(t => t.registered)
-      this.setState({loading: false, tasks: rep, gridData: this.taskToGridData(rep)}, () => this.forceUpdate())
+      this.loadFiles(rep).then(files => {
+        rep.forEach((task, id) => (task.files = files[id].map(f => {return {path: f.fullpath, name: f.title}})))
+        this.setState({loading: false, tasks: rep, gridData: this.taskToGridData(rep)}, () => this.forceUpdate())
+      })
     })
   }
 
@@ -105,13 +114,23 @@ export default class ProjectCalendar extends Component {
     const s = apiToDate(task.begin_acti)
     const e = apiToDate(task.end_acti)
     return (
-      <View style={{height: taskInfosHeight, backgroundColor: `hsl(${60 * id}, 70%, 95%)`, borderRadius: 10}}>
+      <ScrollView style={{height: taskInfosHeight, backgroundColor: `hsl(${60 * id}, 70%, 95%)`, borderRadius: 10}}>
         <View style={{height: 20, elevation: 5, borderTopLeftRadius: 10, borderTopRightRadius: 10, backgroundColor: `hsl(${60 * id}, 70%, 50%)`}} />
         <Text style={styles.infoTitle}>{task.acti_title}</Text>
         <Text style={{marginLeft: 5}}>{task.title_module}</Text>
         <Text style={styles.infoDates}>Debut: {"\n"}{moment(s).format('DD/MM/YYYY')}</Text>
         <Text style={styles.infoDates}>Fin: {"\n"}{moment(e).format('DD/MM/YYYY-hh:mm')}</Text>
-      </View>
+        {task.files ?
+          task.files.map((file, i) => {
+            return (
+              <TouchableOpacity  key={i} onPress={() => Linking.openURL(apiRoot.slice(0, -1) + file.path)}>
+                <Text style={[styles.file, {backgroundColor: `hsl(${60 * id}, 70%, 70%)`}]}>{file.name}</Text>
+              </TouchableOpacity>
+            )
+          })
+          : null
+        }
+      </ScrollView>
     )
   }
 
@@ -192,6 +211,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 15,
     marginLeft: 5,
+  },
+  file: {
+    margin: 5,
+    borderRadius: 3,
+    fontSize: 17,
+    color: "black",
+    padding: 3,
+    elevation: 5,
   }
 });
 
