@@ -12,6 +12,7 @@ import {
   Dimensions,
   AsyncStorage,
   Text,
+  BackAndroid,
 } from 'react-native';
 import Swiper from 'react-native-swiper';
 import Keychain from 'react-native-keychain';
@@ -196,7 +197,10 @@ export default class EpiToken extends Component {
         style={{width: 10}}
         outRangeScale={0.8}
       >
-        <ActionButton.Item buttonColor='#cddc39' title="Notifications" onPress={() => this.setState({displayNotifOption: true})}>
+        <ActionButton.Item buttonColor='#cddc39' title="Notifications" onPress={() => {
+          this.setState({displayNotifOption: true})
+          BackAndroid.addEventListener('hardwareBackPress', this.closeNotif)
+        }}>
           <Icon name="bell" size={30}/>
         </ActionButton.Item>
         <ActionButton.Item buttonColor='#EF5350' title="Log Out" onPress={() => this.logOut()}>
@@ -248,6 +252,12 @@ export default class EpiToken extends Component {
       )
   }
 
+  closeNotif = () => {
+    BackAndroid.removeEventListener('hardwareBackPress', this.closeNotif)
+    this.setState({displayNotifOption: false})
+    return true
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -259,7 +269,9 @@ export default class EpiToken extends Component {
           placement="bottom"
           fromRect={{x: Dimensions.get('window').width / 2, y: Dimensions.get('window').height / 6, width: 0, height: 0}}
           isVisible={this.state.displayNotifOption}
-          onClose={() => this.setState({displayNotifOption: false})}
+          onClose={() => {
+            this.closeNotif()
+          }}
         >
           <NotificationsOptions
           activeTime={this.state.notificationActiveTime}

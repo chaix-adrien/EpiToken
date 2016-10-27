@@ -11,6 +11,7 @@ import {
   Linking,
   ScrollView,
   ActivityIndicator,
+  BackAndroid,
 } from 'react-native';
 import Grid from 'react-native-grid-component';
 import moment from 'moment';
@@ -123,8 +124,12 @@ export default class ProjectCalendar extends Component {
         this.setState({loading: false})
         return
       }
+        rep = rep.concat(rep)
+        rep = rep.concat(rep)
+        rep = rep.concat(rep)
       rep = rep.filter(t => t.registered)
       this.loadFiles(rep).then(files => {
+
         rep.forEach((task, id) => {
           task.files = files[id].map(f => {
             return {path: f.fullpath, name: f.title}
@@ -250,6 +255,11 @@ export default class ProjectCalendar extends Component {
     )
   }
 
+  backButton = () => {
+    this.drawer.close()
+    return true
+  }
+
   getProjectView = (col) => {
     if (!col) {
       return (
@@ -262,9 +272,7 @@ export default class ProjectCalendar extends Component {
     }
     const gridW = ((col) * 30 + 30 + col * 2)
     let openOff = width - gridW
-    console.log(openOff)
     openOff = (openOff < width / 4) ? (width / 4) : openOff
-    console.log("then", openOff)
     return (
       <Drawer
         ref={e => (this.drawer = e)}
@@ -281,6 +289,8 @@ export default class ProjectCalendar extends Component {
         tapToClose={true}
         openDrawerOffset={openOff}
         panCloseMask={0.2}
+        onOpen={() => BackAndroid.addEventListener('hardwareBackPress', this.backButton)}
+        onClose={() => BackAndroid.removeEventListener('hardwareBackPress', this.backButton)}
         closedDrawerOffset={gridW > width / 2.5 ? width / 2.5 : gridW}
         tweenHandler={(ratio) => ({main: { opacity:(2-ratio)/2 }})}
       >
