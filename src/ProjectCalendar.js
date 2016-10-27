@@ -109,7 +109,7 @@ export default class ProjectCalendar extends Component {
   loadFiles = (tasks) => Promise.all(tasks.map(t => fetch(this.getFileUrl(t)).then(r => r.json())))
 
   loadTask = () => {
-    const today = new Date(2015, 11, 10, 12, 0, 0, 0 /*Date.now()*/)
+    const today = new Date(Date.now())
     var data = new FormData();
     data.append("start", today.toISOString())
     data.append("end", today.toISOString())
