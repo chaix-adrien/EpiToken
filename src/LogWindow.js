@@ -43,7 +43,14 @@ export default class LogWindow extends Component {
       method: "POST",
       body: data
     }
-    return fetch(apiRoot + "?format=json", header).then(res => res.json()).then(rep => {
+    return fetch(apiRoot + "?format=json", header).then(r=>{
+      if (r.ok) return r.json()
+      else return null
+    }).then(rep => {
+      if (!rep) {
+        Alert.alert("Network Error:", "Please check your internet conexion")
+        return
+      }
       if (rep.message && log !== "UNDEFINED") {
         Alert.alert("Error while login:", rep.message)
       }

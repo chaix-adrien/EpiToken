@@ -45,3 +45,6 @@ RoadMap
 - [ ] Gestion de theme de couleurs
 - [ ] Onglet "inscription" avec notifications pour chaques nouvelles activités
 - [ ] Version IOS
+
+
+licenses: MIT

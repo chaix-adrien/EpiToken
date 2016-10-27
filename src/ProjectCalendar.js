@@ -18,6 +18,7 @@ import moment from 'moment';
 import {apiToDate} from '../index.android.js'
 import Drawer from 'react-native-drawer'
 import Icon from 'react-native-vector-icons/FontAwesome';
+import {myfetch} from '../index.android.js'
 
 const apiRoot = "https://intra.epitech.eu/"
 const taskInfosHeight = 170
@@ -107,7 +108,7 @@ export default class ProjectCalendar extends Component {
 
   getFileUrl = (t) => `${apiRoot}module/${t.scolaryear}/${t.codemodule}/${t.codeinstance}/${t.codeacti}/project/file/?format=json`
 
-  loadFiles = (tasks) => Promise.all(tasks.map(t => fetch(this.getFileUrl(t)).then(r => r.json())))
+  loadFiles = (tasks) => Promise.all(tasks.map(t => myfetch(this.getFileUrl(t))))
 
   loadTask = () => {
     const today = new Date(Date.now())
@@ -118,15 +119,12 @@ export default class ProjectCalendar extends Component {
      method: "POST",
      body: data
     }
-    fetch(apiRoot + "module/board/?format=json", header).then(res => res.json())
+    myfetch(apiRoot + "module/board/?format=json", header)
     .then(rep => {
       if (!rep.length) {
         this.setState({loading: false})
         return
       }
-        rep = rep.concat(rep)
-        rep = rep.concat(rep)
-        rep = rep.concat(rep)
       rep = rep.filter(t => t.registered)
       this.loadFiles(rep).then(files => {
 

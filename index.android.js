@@ -26,7 +26,19 @@ import ProjectCalendar from './src/ProjectCalendar.js'
 import NotificationsOptions from './src/NotificationsOptions.js'
 import LogWindow from './src/LogWindow.js'
 import ActList from './src/ActList.js'
+
 const apiRoot = "https://intra.epitech.eu/"
+const {width, height} = Dimensions.get('window')
+
+export const myfetch = (url, header) => {
+  return fetch(url, header).then(r => {
+    if (r.status === 200 && r.ok) return r.json()
+    else throw 'Error ' + r.status
+  })
+  .catch(e => {
+    throw "Error while fetching url " + url
+  })
+}
 
 export const apiToDate = (str) => {
   d = str.split(" ")[0]
@@ -267,7 +279,7 @@ export default class EpiToken extends Component {
         {this.displayLoadingScreen()}
         <Popover
           placement="bottom"
-          fromRect={{x: Dimensions.get('window').width / 2, y: Dimensions.get('window').height / 6, width: 0, height: 0}}
+          fromRect={{x: width / 2, y: height/ 6, width: 0, height: 0}}
           isVisible={this.state.displayNotifOption}
           onClose={() => {
             this.closeNotif()
@@ -297,7 +309,7 @@ const styles = StyleSheet.create({
   loading: {
     justifyContent: "center",
     alignItems: "center",
-    width: Dimensions.get('window').width,
+    width: width,
     height: Dimensions.get('window').height,
     position: 'absolute',
     top: 0, left: 0,

@@ -12,7 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome'
 
 import {ActivitieToken, Activitie} from './Activitie.js'
-import {apiToDate} from '../index.android.js'
+import {apiToDate, myfetch} from '../index.android.js'
 
 const apiRoot = "https://intra.epitech.eu/"
 const sectionContent = ["MAINTENANT", "TOKEN", "Aujourd'hui", "Demain", "7 Jours", "30 Jours"]
@@ -98,9 +98,8 @@ export default class ActList extends Component {
     method: "POST",
     body: data
    }
-   fetch(apiRoot + "planning/load" + "?format=json", header).then(res => res.json())
+   myfetch(apiRoot + "planning/load" + "?format=json", header)
    .then(activitiesBrut => {
-    if (activitiesBrut.message) return
     const myActivities = activitiesBrut.filter(act => (__DEV__) ? act.event_registered : act.event_registered === "registered")
     const out = sectionContent.map(e => [])
     const today = new Date(getNowDate())
@@ -163,8 +162,7 @@ export default class ActList extends Component {
       method: "POST",
       body: data
     }
-    return fetch(this.getTokenLink(act), header)
-    .then(res => res.json())
+    return myfetch(this.getTokenLink(act), header)
     .then(rep => {
       if ((__DEV__) ? !rep.error : rep.error) {
         Alert.alert("Mauvais token:", rep.error)
