@@ -12,6 +12,7 @@
     "react-native": "0.35.0",
     "react-native-action-button": "^2.0.9",
     "react-native-check-box": "^1.0.0",
+    "react-native-drawer": "^2.3.0",
     "react-native-grid-component": "^1.0.0",
     "react-native-keychain": "^0.3.2",
     "react-native-loader": "^1.1.0",
