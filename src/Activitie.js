@@ -64,8 +64,17 @@ export class ActivitieToken extends Component {
     const {activitie} = this.props
     if (!activitie) return null
     const date = new Date(activitie.start.split(' ')[0])
-    let room = activitie.room.code.split('/')
-    room = room[room.length - 1]
+    let room = ""
+    if (activitie.room) {
+      if (activitie.room.code) {
+        room = activitie.room.code.split('/')
+        room = room[room.length - 1]
+      } else {
+        room = "N/A"
+      }
+    } else {
+        room = "N/A"
+    }
     return (
       <View style={styles.tokenContainer}>
         <View style={{flexDirection: "row"}}>
@@ -107,8 +116,17 @@ export class Activitie extends Component {
   render() {
     const {activitie, section} = this.props
     const date = new Date(activitie.start.split(' ')[0])
-    let room = activitie.room.code.split('/')
-    room = room[room.length - 1]
+    let room = ""
+    if (activitie.room) {
+      if (activitie.room.code) {
+        room = activitie.room.code.split('/')
+        room = room[room.length - 1]
+      } else {
+        room = "N/A"
+      }
+    } else {
+      room = "N/A"
+    }
     return (
       <View style={styles.activitieContainer}>
         <View style={{flex: 6}}>

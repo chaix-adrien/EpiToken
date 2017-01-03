@@ -21,8 +21,6 @@ const sectionColor = ["#8bc34a", "#EF5350", "#81d4fa", "#81d4fa", "#81d4fa", "#8
 
 const getNowDate = () => {
   const start = new Date(Date.now())
-  if (__DEV__)
-    return "2015-10-02T10:20:00"
   return start.toISOString()
 }
 
@@ -111,7 +109,7 @@ export default class ActList extends Component {
     myActivities.forEach((act, id) => {
       const actDate = apiToDate(act.start)
       const actDateEnd = apiToDate(act.end)
-      if (act.allow_token) {
+      if (act.allow_token && act.event_registered != 'present') {
         out[sectionContent.indexOf("TOKEN")].push(act)
       }
       if (today.getTime() < actDateEnd.getTime() && today.getTime() > actDate.getTime()) {

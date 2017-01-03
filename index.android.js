@@ -162,9 +162,19 @@ export default class EpiToken extends Component {
       else if (min > 5) return "#ffc107"
       else return "#d50000"
     }
-    let room = act.room.code.split('/')
-    room = room[room.length - 1]
-    if (apiToDate(act.start).getTime() - 1000 * 60 * minBefore > Date.now()) {
+      console.log(act.room )
+      let room = ""
+      if (act.room) {
+	  if (act.room.code) {    
+	      room = act.room.code.split('/')
+	      room = room[room.length - 1]
+	  } else {
+	      room = "N/A"
+	  }
+      } else {
+	  room = "N/A"
+      }
+	  if (apiToDate(act.start).getTime() - 1000 * 60 * minBefore > Date.now()) {
       PushNotification.localNotificationSchedule({
           largeIcon: "ic_launcher",
           smallIcon: "ic_launcher",
