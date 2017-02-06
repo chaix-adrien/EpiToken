@@ -79,7 +79,7 @@ export class ActivitieToken extends Component {
       <View style={styles.tokenContainer}>
         <View style={{flexDirection: "row"}}>
           <View style={{flex: 8}}>
-            <Text style={styles.activitieTitle}>{activitie.acti_title}</Text>
+            <Text style={styles.activitieTitle}>{activitie.acti_title ? activitie.acti_title : activitie.title}</Text>
             <Text style={styles.date}>{days_name[date.getDay()]} {date.getDate()} {month_name[date.getMonth()]} - {activitie.start.split(' ')[1].split(':').slice(0, 2).join(':')}</Text>
           </View>
           <Text style={[styles.room, {flex: 2}]}>{room}</Text>
@@ -130,8 +130,8 @@ export class Activitie extends Component {
     return (
       <View style={styles.activitieContainer}>
         <View style={{flex: 6}}>
-          <Text style={styles.activitieTitle}>{activitie.acti_title}</Text>
-          <Text style={styles.moduleTitle}>{activitie.titlemodule}</Text>
+          <Text style={styles.activitieTitle}>{activitie.acti_title ? activitie.acti_title : activitie.title}</Text>
+          <Text style={styles.moduleTitle}>{activitie.titlemodule ? activitie.titlemodule : activitie.description}</Text>
           {section > 1 ?
             <Text style={styles.date}>{days_name[date.getDay()]} {date.getDate()} {month_name[date.getMonth()]}</Text>
             : null

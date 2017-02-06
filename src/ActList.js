@@ -27,13 +27,13 @@ const getNowDate = () => {
 const getStartDate = () => {
   const now = new Date(getNowDate())
   const start = new Date(now.getTime() - 1000 * 60 * 60 * 24 * 3)
-  return start.toISOString()
+  return start.getFullYear() + "-" + (start.getMonth() + 1) + "-" + start.getDate()
 }
 
 const getEndDate = () => {
   const start = new Date(getNowDate())
   const end = new Date(start.getTime() + 1000 * 60 * 60 * 24 * 30)
-  return end.toISOString()
+  return end.getFullYear() + "-" + (end.getMonth() + 1) + "-" + end.getDate()
 }
 
 export default class ActList extends Component {
@@ -90,13 +90,8 @@ export default class ActList extends Component {
 
   loadActivities = () => {
    var data = new FormData();
-   data.append("start", getStartDate())
-   data.append("end", getEndDate())
-   const header = {
-    method: "POST",
-    body: data
-   }
-   myfetch(apiRoot + "planning/load" + "?format=json", header)
+   const header = {}
+   myfetch(apiRoot + "planning/load" + "?format=json&start=" + getStartDate() + "&end=" + getEndDate(), header)
    .then(activitiesBrut => {
     const myActivities = activitiesBrut.filter(act => (__DEV__) ? act.event_registered : act.event_registered === "registered")
     const out = sectionContent.map(e => [])

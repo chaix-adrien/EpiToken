@@ -172,6 +172,7 @@ export default class ProjectCalendar extends Component {
       case "gz": return "file-zip-o"
       case "mp3": return "file-audio-o"
       case "wav": return "file-audio-o"
+      default : return "file-o"
     }
   }
 
