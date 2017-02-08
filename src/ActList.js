@@ -7,6 +7,7 @@ import {
   Dimensions,
   RefreshControl,
   Alert,
+  ToastAndroid,
   AsyncStorage,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'
@@ -161,6 +162,7 @@ export default class ActList extends Component {
         Alert.alert("Mauvais token:", rep.error)
         return false
       } else {
+        ToastAndroid.show('Token registered.', ToastAndroid.SHORT);
         this.setState({activities: this.deleteTokenActivitie(this.state.activities, act)})
         return true
       }

@@ -26,16 +26,19 @@ import ProjectCalendar from './src/ProjectCalendar.js'
 import NotificationsOptions from './src/NotificationsOptions.js'
 import LogWindow from './src/LogWindow.js'
 import ActList from './src/ActList.js'
+import RegisterList from './src/RegisterList.js'
 
 const apiRoot = "https://intra.epitech.eu/"
 const {width, height} = Dimensions.get('window')
 
 export const myfetch = (url, header) => {
   return fetch(url, header).then(r => {
+    console.log("return", url)
     if (r.status === 200 && r.ok) return r.json()
     else throw 'Error ' + r.status
   })
   .catch(e => {
+    console.log("error", url, header)
     throw "Error while fetching url " + url
   })
 }
@@ -267,6 +270,7 @@ export default class EpiToken extends Component {
       return (
         <View style={styles.container}>
           <Swiper showsButtons={false} pageMargin={10} loop={false}>
+            <RegisterList tabLabel="Register" switchWaiting={this.switchWaiting} switchLoading={this.switchLoading} />
             <ActList tabLabel="Activités" activeNotification={this.activeNotification} switchWaiting={this.switchWaiting} switchLoading={this.switchLoading} />
             <ProjectCalendar tabLabel="Projets" switchWaiting={this.switchWaiting} switchLoading={this.switchLoading} />
           </Swiper>
