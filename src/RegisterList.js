@@ -52,8 +52,11 @@ export default class RegisterList extends Component {
     super(props)
     this.state = {
       module: [],
+      project: [],
       hiddedModule: [],
+      hiddedProject: [],
       displayHiddenModule: false,
+      displayHiddenProject: false,
       project: [],
       refreshing: true,
     }
@@ -68,11 +71,15 @@ export default class RegisterList extends Component {
     myfetch(apiRoot + "?format=json", header)
     .then(all => {
       let module = all.board.modules
-      AsyncStorage.getItem("@Epitoken:hiddedModule", (err, res) => {
-        let hidden = []
-        if (res)
-          hidden = JSON.parse(res)
-        this.setState({hiddedModule: hidden, module: module, refreshing: false}, () => this.props.switchLoading(false))
+      let project = all.board.projets.filter(p => p.date_inscription)
+      AsyncStorage.multiGet(["@Epitoken:hiddedModule", "@Epitoken:hiddedProject"], (err, res) => {
+        let hiddedModule = []
+        if (res[0][1])
+          hiddedModule = JSON.parse(res[0][1])
+        let hiddedProject = []
+        if (res[1][1])
+          hiddedProject = JSON.parse(res[1][1])
+        this.setState({project: project, hiddedProject: hiddedProject, hiddedModule: hiddedModule, module: module, refreshing: false}, () => this.props.switchLoading(false))
       })
     })
   }
@@ -86,6 +93,18 @@ export default class RegisterList extends Component {
       this.loadAll()
     }).catch(e => {
       ToastAndroid.show('Sorry, unable to register to this module.', ToastAndroid.SHORT);
+    })
+  }
+
+  registerToProject = (project) => {
+   var data = new FormData();
+    const header = {method: 'POST'}
+    myfetch(apiRoot + project.title_link + "project/register?format=json", header)
+    .then(rep => {
+      ToastAndroid.show('Project successfully registered.', ToastAndroid.SHORT); 
+      this.loadAll()
+    }).catch(e => {
+      ToastAndroid.show(e, ToastAndroid.SHORT);
     })
   }
 
@@ -105,15 +124,17 @@ export default class RegisterList extends Component {
 
   }
 
-  isModuleHidded = (mod) => this.state.hiddedModule.some(m => m.title_link === mod.title_link)
+  isHidded = (mod) => this.state.hiddedModule.some(m => m.title_link === mod.title_link)
 
   render() {
-    const {module, hiddedModule, displayHiddenModule} = this.state
+    const {module, hiddedModule, displayHiddenModule, displayHiddenProject, project} = this.state
     let listData = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2, sectionHeaderHasChanged: (r1, r2) => r1 !== r2})
-    let moduleToDisplay = (displayHiddenModule) ?  module : module.filter(mod => !this.isModuleHidded(mod))
+    let moduleToDisplay = (displayHiddenModule) ?  module : module.filter(mod => !this.isHidded(mod))
+    let projectToDisplay = (displayHiddenProject) ?  project : project.filter(mod => !this.isHidded(mod))
     return (
       <View style={styles.container}>
         <View style={{height: 12}} />
+        <Text>Module</Text>
         <Switch
           onValueChange={(value) => this.setState({displayHiddenModule: value})}
           style={{marginBottom: 10}}
@@ -130,7 +151,7 @@ export default class RegisterList extends Component {
               module={rowData}
               showModule={this.showModule}
               hideModule={this.hideModule}
-              isHidded={this.isModuleHidded(rowData)}
+              isHidded={this.isHidded(rowData)}
               register={this.registerToModule}
               />}
           />
@@ -139,6 +160,34 @@ export default class RegisterList extends Component {
             <Text style={{fontSize: 25, fontWeight: "bold"}}>Aucun nouveau module.</Text>
           </View>
         }
+      <Text>Projets</Text>
+        <Switch
+          onValueChange={(value) => this.setState({displayHiddenProject: value})}
+          style={{marginBottom: 10}}
+          value={this.state.displayHiddenProject}
+        />
+        {(projectToDisplay.length) ?
+          <ListView
+            refreshControl={<RefreshControl refreshing={this.state.refreshing} onRefresh={this.loadAll}/>}
+            style={{width: Dimensions.get("window").width}}
+            dataSource={listData.cloneWithRows(projectToDisplay)}
+            enableEmptySections={true}
+            renderRow={(rowData, sid, id) =>
+              <ModuleRegisterable
+              module={rowData}
+              showModule={this.showModule}
+              hideModule={this.hideModule}
+              isHidded={this.isHidded(rowData)}
+              register={this.registerToProject}
+              />}
+          />
+          :
+          <View style={{flex: 1, width: Dimensions.get("window").width, margin: 10, padding: 10, alignItems: 'center', justifyContent: "center"}}>
+            <Text style={{fontSize: 25, fontWeight: "bold"}}>Aucun nouveau projet.</Text>
+          </View>
+        }
+
+
       </View>
     );
   }
