@@ -25,9 +25,9 @@ class ModuleRegisterable extends Component {
     const {module, register, hideModule, isHidded, showModule} = this.props
     return (
       <View style={styles.module}>
-        <Text style={{fontSize: 20, flex: 0.8}}>{module.title} </Text>
+        <Text style={{fontSize: 20, flex: 0.8, fontWeight: "bold"}}>{module.title} </Text>
          <TouchableOpacity
-          style={{padding: 4, borderRadius: 5, backgroundColor: "#666666", marginRight: 5}}
+            style={styles.registerButton}
             onPress={() => register(module)}
          >
          <Text style={{color: "white", fontWeight: "bold"}}>Register</Text>
@@ -92,7 +92,7 @@ class ProjectRegisterable extends Component {
     if (moreData.nb_min === 1 && moreData.nb_max === 1) {
       return (
         <TouchableOpacity
-        style={{padding: 4, borderRadius: 5, backgroundColor: "#666666", marginRight: 5}}
+        style={styles.registerButton}
         onPress={() => register(project)}
         >
           <Text style={{color: "white", fontWeight: "bold"}}>Register</Text>
@@ -101,15 +101,15 @@ class ProjectRegisterable extends Component {
     }
     else if (moreData.nb_min === 1) {
       return (
-        <View style={{flexDirection: "row"}}>
+        <View style={{flexDirection: "row", justifyContent: "center"}}>
           <TouchableOpacity
-          style={{padding: 4, borderRadius: 5, backgroundColor: "#666666", marginRight: 5}}
+          style={styles.registerButton}
           onPress={() => register(project)}
           >
             <Text style={{color: "white", fontWeight: "bold"}}>Register</Text>
           </TouchableOpacity>
           <TouchableOpacity
-          style={{padding: 4, borderRadius: 5, backgroundColor: "#666666", marginRight: 5}}
+          style={styles.registerButton}
           onPress={() => Linking.openURL(apiRoot + project.title_link + "project")}
           >
             <Text style={{color: "white", fontWeight: "bold"}}>Create Group</Text>
@@ -120,7 +120,7 @@ class ProjectRegisterable extends Component {
     else {
       return (
         <TouchableOpacity
-        style={{padding: 4, borderRadius: 5, backgroundColor: "#666666", marginRight: 5}}
+        style={styles.registerButton}
         onPress={() => Linking.openURL(apiRoot + project.title_link + "project")}
         >
           <Text style={{color: "white", fontWeight: "bold"}}>Create Group</Text>
@@ -135,7 +135,7 @@ class ProjectRegisterable extends Component {
     return (
       <TouchableOpacity style={styles.project} onPress={() => this.onClick()}>
         <View style={{flexDirection: "row"}} >
-          <Text style={{fontSize: 20, flex: 0.8}}>{project.title} </Text>
+          <Text style={{fontSize: 20, flex: 0.8, fontWeight: "bold"}}>{project.title} </Text>
            <Icon
               name="long-arrow-right"
               size={20}
@@ -157,12 +157,11 @@ class ProjectRegisterable extends Component {
         </View>
         {show ?
           <View>
-            {this.displayRegisterButton()}
-            <Text>{moreData.description}</Text>
-            {this.displayGroupData()}
             <Text>{moreData.module_title}</Text>
+            <Text style={{margin: 5, fontStyle: 'italic'}}>{moreData.description}</Text>
+            {this.displayGroupData()}
             <Text>Fin d'inscription: {moreData.end_register}</Text>
-          
+            {this.displayRegisterButton()}
           </View>
           : null
         }
@@ -270,7 +269,6 @@ export default class RegisterList extends Component {
         />
         {(moduleToDisplay.length) ?
           <ListView
-            refreshControl={<RefreshControl refreshing={this.state.refreshing} onRefresh={this.loadAll}/>}
             style={{width: Dimensions.get("window").width}}
             dataSource={listData.cloneWithRows(moduleToDisplay)}
             enableEmptySections={true}
@@ -296,7 +294,6 @@ export default class RegisterList extends Component {
         />
         {(projectToDisplay.length) ?
           <ListView
-            refreshControl={<RefreshControl refreshing={this.state.refreshing} onRefresh={this.loadAll}/>}
             style={{width: Dimensions.get("window").width}}
             dataSource={listData.cloneWithRows(projectToDisplay)}
             enableEmptySections={true}
@@ -314,8 +311,6 @@ export default class RegisterList extends Component {
             <Text style={{fontSize: 25, fontWeight: "bold"}}>Aucun nouveau projet.</Text>
           </View>
         }
-
-
       </View>
     );
   }
@@ -372,7 +367,15 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     padding: 5,
     elevation: 5,
-  }
+  },
+  registerButton: {
+    padding: 4,
+    borderRadius: 5,
+    backgroundColor: "#666666",
+    margin: 5,
+    elevation: 2,
+    alignSelf: "center",
+  },
 });
 
 
