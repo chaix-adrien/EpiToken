@@ -11,6 +11,7 @@ import {
   AsyncStorage,
   TouchableOpacity,
   ToastAndroid,
+  Linking,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'
 
@@ -53,32 +54,119 @@ class ProjectRegisterable extends Component {
     super(props)
     this.state = {
       show: false,
+      moreData: {}
+    }
+  }
+
+  loadMore = () => {
+    const {project} = this.props
+    if (this.state.moreData.nb_min)
+      return Promise.resolve(this.state.moreData)
+    return myfetch(apiRoot + project.title_link + "project/?format=json")
+    .then(data => {
+      data.registered = []
+      this.setState({moreData: data})
+      return data
+    })
+  }
+
+  onClick = () => {
+    if (this.state.show) {
+      this.setState({show: false})
+    } else {
+      this.loadMore().then(e => this.setState({show: true}))
+    }
+  }
+
+  displayGroupData = () => {
+    const {moreData} = this.state
+    if (moreData.nb_min === 1 && moreData.nb_max === 1)
+      return (<Text>Projet individuel</Text>)
+    else
+      return (<Text>Groupe de {moreData.nb_min} à {moreData.nb_max}</Text>)
+  }
+
+  displayRegisterButton = () => {
+    const {project} = this.props
+    const {moreData} = this.state
+    if (moreData.nb_min === 1 && moreData.nb_max === 1) {
+      return (
+        <TouchableOpacity
+        style={{padding: 4, borderRadius: 5, backgroundColor: "#666666", marginRight: 5}}
+        onPress={() => register(project)}
+        >
+          <Text style={{color: "white", fontWeight: "bold"}}>Register</Text>
+        </TouchableOpacity>
+      )
+    }
+    else if (moreData.nb_min === 1) {
+      return (
+        <View style={{flexDirection: "row"}}>
+          <TouchableOpacity
+          style={{padding: 4, borderRadius: 5, backgroundColor: "#666666", marginRight: 5}}
+          onPress={() => register(project)}
+          >
+            <Text style={{color: "white", fontWeight: "bold"}}>Register</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+          style={{padding: 4, borderRadius: 5, backgroundColor: "#666666", marginRight: 5}}
+          onPress={() => Linking.openURL(apiRoot + project.title_link + "project")}
+          >
+            <Text style={{color: "white", fontWeight: "bold"}}>Create Group</Text>
+          </TouchableOpacity>
+        </View>
+      )
+    }
+    else {
+      return (
+        <TouchableOpacity
+        style={{padding: 4, borderRadius: 5, backgroundColor: "#666666", marginRight: 5}}
+        onPress={() => Linking.openURL(apiRoot + project.title_link + "project")}
+        >
+          <Text style={{color: "white", fontWeight: "bold"}}>Create Group</Text>
+        </TouchableOpacity>
+      )
     }
   }
 
   render() {
     const {project, register, hideProject, isHidded, showProject} = this.props
+    const {show, moreData} = this.state
     return (
-      <View style={styles.module}>
-        <Text style={{fontSize: 20, flex: 0.8}}>{project.title} </Text>
+      <TouchableOpacity style={styles.project} onPress={() => this.onClick()}>
+        <View style={{flexDirection: "row"}} >
+          <Text style={{fontSize: 20, flex: 0.8}}>{project.title} </Text>
+           <Icon
+              name="long-arrow-right"
+              size={20}
+              color="#AAAAAA"
+              style={{marginRight: 1}}
+            />
+            <Text>{project.timeline_end}</Text>
          <TouchableOpacity
-          style={{padding: 4, borderRadius: 5, backgroundColor: "#666666", marginRight: 5}}
-            onPress={() => register(project)}
+            style={{left: 4, top: -4}}
+            onPress={() => {!isHidded ? hideProject(project) : showProject(project)}}
          >
-         <Text style={{color: "white", fontWeight: "bold"}}>Register</Text>
+           <Icon
+              name={!isHidded ? "times" : "eye"}
+              size={20}
+              color="#AAAAAA"
+              style={{margin: 3, marginRight: 10, flex: 0.2}}
+            />
           </TouchableOpacity>
-       <TouchableOpacity
-          style={{left: 4, top: -4}}
-          onPress={() => {!isHidded ? hideProject(project) : showProject(project)}}
-       >
-         <Icon
-            name={!isHidded ? "times" : "eye"}
-            size={20}
-            color="#AAAAAA"
-            style={{margin: 3, marginRight: 10, flex: 0.2}}
-          />
-        </TouchableOpacity>
-      </View>
+        </View>
+        {show ?
+          <View>
+            {this.displayRegisterButton()}
+            <Text>{moreData.description}</Text>
+            {this.displayGroupData()}
+            <Text>{moreData.module_title}</Text>
+            <Text>Fin d'inscription: {moreData.end_register}</Text>
+          
+          </View>
+          : null
+        }
+      </TouchableOpacity>
     )
   }
 }
@@ -264,6 +352,17 @@ const styles = StyleSheet.create({
   },
   module: {
     flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginLeft: 5,
+    marginRight: 5,
+    marginTop: 4,
+    marginBottom: 2,
+    backgroundColor: "white",
+    padding: 5,
+    elevation: 5,
+  },
+  project: {
     justifyContent: "space-between",
     alignItems: "center",
     marginLeft: 5,

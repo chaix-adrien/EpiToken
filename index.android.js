@@ -33,12 +33,10 @@ const {width, height} = Dimensions.get('window')
 
 export const myfetch = (url, header) => {
   return fetch(url, header).then(r => {
-    console.log("return", url)
     if (r.status === 200 && r.ok) return r.json()
     else throw 'Error ' + r.status
   })
   .catch(e => {
-    console.log("error", url, header)
     throw "Error while fetching url " + url
   })
 }
