@@ -33,7 +33,7 @@ class ModuleRegisterable extends Component {
           </TouchableOpacity>
        <TouchableOpacity
           style={{left: 4, top: -4}}
-          onPress={() => {!isHidded ? hideModule(module, true) : showModule(module)}}
+          onPress={() => {!isHidded ? hideModule(module) : showModule(module)}}
        >
          <Icon
             name={!isHidded ? "times" : "eye"}
@@ -46,6 +46,43 @@ class ModuleRegisterable extends Component {
     )
   }
 }
+
+
+class ProjectRegisterable extends Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      show: false,
+    }
+  }
+
+  render() {
+    const {project, register, hideProject, isHidded, showProject} = this.props
+    return (
+      <View style={styles.module}>
+        <Text style={{fontSize: 20, flex: 0.8}}>{project.title} </Text>
+         <TouchableOpacity
+          style={{padding: 4, borderRadius: 5, backgroundColor: "#666666", marginRight: 5}}
+            onPress={() => register(project)}
+         >
+         <Text style={{color: "white", fontWeight: "bold"}}>Register</Text>
+          </TouchableOpacity>
+       <TouchableOpacity
+          style={{left: 4, top: -4}}
+          onPress={() => {!isHidded ? hideProject(project) : showProject(project)}}
+       >
+         <Icon
+            name={!isHidded ? "times" : "eye"}
+            size={20}
+            color="#AAAAAA"
+            style={{margin: 3, marginRight: 10, flex: 0.2}}
+          />
+        </TouchableOpacity>
+      </View>
+    )
+  }
+}
+
 
 export default class RegisterList extends Component {
   constructor(props) {
@@ -108,29 +145,32 @@ export default class RegisterList extends Component {
     })
   }
 
-  hideModule = (module, toast) => {
+  hideElem = (store, stateId, module, toast) => {
     if (toast)
       ToastAndroid.show('Module successfully hided.', ToastAndroid.SHORT);
     let newTab = this.state.hiddedModule.map(e => e);
     newTab.push(module)
-    AsyncStorage.setItem("@Epitoken:hiddedModule", JSON.stringify(newTab))
-    this.setState({hiddedModule: newTab})
+    AsyncStorage.setItem(store, JSON.stringify(newTab))
+    const state = {}
+    state[stateId] = newTab
+    this.setState(state)
   }
 
-  showModule = (module) => {
+  showElem = (store, stateId, module) => {
     let newTab = this.state.hiddedModule.filter(mod => !(mod.title === module.title && mod.scolaryear === module.scolaryear))
-    AsyncStorage.setItem("@Epitoken:hiddedModule", JSON.stringify(newTab))
-    this.setState({hiddedModule: newTab})
-
+    AsyncStorage.setItem(store, JSON.stringify(newTab))
+    const state = {}
+    state[stateId] = newTab
+    this.setState(state)
   }
 
-  isHidded = (mod) => this.state.hiddedModule.some(m => m.title_link === mod.title_link)
+  isHidded = (key, mod) => this.state[key].some(m => m.title_link === mod.title_link)
 
   render() {
     const {module, hiddedModule, displayHiddenModule, displayHiddenProject, project} = this.state
     let listData = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2, sectionHeaderHasChanged: (r1, r2) => r1 !== r2})
-    let moduleToDisplay = (displayHiddenModule) ?  module : module.filter(mod => !this.isHidded(mod))
-    let projectToDisplay = (displayHiddenProject) ?  project : project.filter(mod => !this.isHidded(mod))
+    let moduleToDisplay = (displayHiddenModule) ?  module : module.filter(mod => !this.isHidded("hiddedModule", mod))
+    let projectToDisplay = (displayHiddenProject) ?  project : project.filter(mod => !this.isHidded("hiddedProject", mod))
     return (
       <View style={styles.container}>
         <View style={{height: 12}} />
@@ -149,9 +189,9 @@ export default class RegisterList extends Component {
             renderRow={(rowData, sid, id) =>
               <ModuleRegisterable
               module={rowData}
-              showModule={this.showModule}
-              hideModule={this.hideModule}
-              isHidded={this.isHidded(rowData)}
+              showModule={(mod) => this.showElem("@Epitoken:hiddedModule", "hiddedModule", mod)}
+              hideModule={(mod) => this.hideElem("@Epitoken:hiddedModule", "hiddedModule", mod, true)}
+              isHidded={this.isHidded("hiddedModule", rowData)}
               register={this.registerToModule}
               />}
           />
@@ -173,11 +213,11 @@ export default class RegisterList extends Component {
             dataSource={listData.cloneWithRows(projectToDisplay)}
             enableEmptySections={true}
             renderRow={(rowData, sid, id) =>
-              <ModuleRegisterable
-              module={rowData}
-              showModule={this.showModule}
-              hideModule={this.hideModule}
-              isHidded={this.isHidded(rowData)}
+              <ProjectRegisterable
+              project={rowData}
+              showProject={(proj) => this.showElem("@Epitoken:hiddedProject", "hiddedProject", proj)}
+              hideProject={(proj) => this.hideElem("@Epitoken:hiddedProject", "hiddedProject", proj, true)}
+              isHidded={this.isHidded("hiddedProject", rowData)}
               register={this.registerToProject}
               />}
           />
@@ -235,3 +275,12 @@ const styles = StyleSheet.create({
     elevation: 5,
   }
 });
+
+
+//popup quand clic sur module:
+//credit / projets / cours
+
+//projets: afficher nom de module : projet / date end
+//au clic: afficher credit / button register / nb groupe (si min > 1, pas afficher bouton register ou rediriger vers la page interent)
+//afficher date finale pour inscription des projets
+//date de rendu
