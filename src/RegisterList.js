@@ -260,13 +260,15 @@ export default class RegisterList extends Component {
     let projectToDisplay = (displayHiddenProject) ?  project : project.filter(mod => !this.isHidded("hiddedProject", mod))
     return (
       <View style={styles.container}>
-        <View style={{height: 12}} />
-        <Text>Module</Text>
+        <View style={{height: 12, width: Dimensions.get("window").width}} />
+        <View style={styles.titles}>
+        <Text style={styles.titleText}>Modules</Text>
         <Switch
           onValueChange={(value) => this.setState({displayHiddenModule: value})}
           style={{marginBottom: 10}}
           value={this.state.displayHiddenModule}
         />
+        </View>
         {(moduleToDisplay.length) ?
           <ListView
             style={{width: Dimensions.get("window").width}}
@@ -286,12 +288,14 @@ export default class RegisterList extends Component {
             <Text style={{fontSize: 25, fontWeight: "bold"}}>Aucun nouveau module.</Text>
           </View>
         }
-      <Text>Projets</Text>
+        <View style={styles.titles}>
+        <Text style={styles.titleText}>Projets</Text>
         <Switch
           onValueChange={(value) => this.setState({displayHiddenProject: value})}
           style={{marginBottom: 10}}
           value={this.state.displayHiddenProject}
         />
+        </View>
         {(projectToDisplay.length) ?
           <ListView
             style={{width: Dimensions.get("window").width}}
@@ -375,6 +379,27 @@ const styles = StyleSheet.create({
     margin: 5,
     elevation: 2,
     alignSelf: "center",
+  },
+  titles : {
+    width: Dimensions.get("window").width,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "#81d4fa",
+    padding: 5,
+    margin: 5,
+    padding: 5,
+    elevation: 5,
+    borderRadius: 5,
+  },
+  titleText: {
+    fontSize: 30,
+    fontWeight: "bold",
+    fontStyle: "italic",
+    color: "black",
+    marginLeft: 5,
+    textShadowColor: "rgba(0, 0, 0, 100)",
+    textShadowOffset: {width: 1, height: 1},
+    textShadowRadius: 5,
   },
 });
 
