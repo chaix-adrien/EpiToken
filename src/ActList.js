@@ -43,6 +43,7 @@ export default class ActList extends Component {
     this.state = {
       activities: [],
       refreshing: true,
+      hidedToken: [],
     }
   }
 
@@ -89,42 +90,58 @@ export default class ActList extends Component {
     })
   }
 
+  isHidedToken = (act) => this.state.hidedToken.some(m => m.codeacti === act.codeacti && m.codeevent === act.codeevent)
+
+  hideToken = (act) => {
+    const newTab = this.state.hidedToken.map(e => e)
+    newTab.push(act)
+    AsyncStorage.setItem("@Epitoken:hiddedToken", JSON.stringify(newTab), () => {
+      this.loadActivities()
+    })
+  }
+
   loadActivities = () => {
-   var data = new FormData();
-   const header = {}
-   myfetch(apiRoot + "planning/load" + "?format=json&start=" + getStartDate() + "&end=" + getEndDate(), header)
+   const load = () => myfetch(apiRoot + "planning/load" + "?format=json&start=" + getStartDate() + "&end=" + getEndDate())
    .then(activitiesBrut => {
-    const myActivities = activitiesBrut.filter(act => (__DEV__) ? act.event_registered : act.event_registered === "registered")
-    const out = sectionContent.map(e => [])
-    const today = new Date(getNowDate())
-    myActivities.sort((a, b) => {
-      const dA = apiToDate(a.start)
-      const dB = apiToDate(b.start)
-      return dA.getTime() - dB.getTime()
+      const myActivities = activitiesBrut.filter(act => (__DEV__) ? act.event_registered : act.event_registered === "registered")
+      const out = sectionContent.map(e => [])
+      const today = new Date(getNowDate())
+      myActivities.sort((a, b) => {
+        const dA = apiToDate(a.start)
+        const dB = apiToDate(b.start)
+        return dA.getTime() - dB.getTime()
+      })
+      myActivities.forEach((act, id) => {
+        const actDate = apiToDate(act.start)
+        const actDateEnd = apiToDate(act.end)
+        if (act.allow_token && act.event_registered != 'present' && !this.isHidedToken(act)) {
+          out[sectionContent.indexOf("TOKEN")].push(act)
+        }
+        if (today.getTime() < actDateEnd.getTime() && today.getTime() > actDate.getTime()) {
+          out[sectionContent.indexOf("MAINTENANT")].push(act)
+        } else if (actDate.getTime() < today.getTime()) {
+          // ignore it
+        } else if (this.getDayDiff(actDate, today) < 1) {
+          out[sectionContent.indexOf("Aujourd'hui")].push(act)
+        } else if (this.getDayDiff(actDate, today) < 2) {
+          out[sectionContent.indexOf("Demain")].push(act)
+        } else if (this.getDayDiff(actDate, today) < 7) {
+          out[sectionContent.indexOf("7 Jours")].push(act)
+        } else {
+          out[sectionContent.indexOf("30 Jours")].push(act)
+        }
+      })
+      this.props.activeNotification(myActivities)
+      this.setState({activities: out, refreshing: false}, () => this.props.switchLoading(false))
     })
-    myActivities.forEach((act, id) => {
-      const actDate = apiToDate(act.start)
-      const actDateEnd = apiToDate(act.end)
-      if (act.allow_token && act.event_registered != 'present') {
-        out[sectionContent.indexOf("TOKEN")].push(act)
-      }
-      if (today.getTime() < actDateEnd.getTime() && today.getTime() > actDate.getTime()) {
-        out[sectionContent.indexOf("MAINTENANT")].push(act)
-      } else if (actDate.getTime() < today.getTime()) {
-        // ignore it
-      } else if (this.getDayDiff(actDate, today) < 1) {
-        out[sectionContent.indexOf("Aujourd'hui")].push(act)
-      } else if (this.getDayDiff(actDate, today) < 2) {
-        out[sectionContent.indexOf("Demain")].push(act)
-      } else if (this.getDayDiff(actDate, today) < 7) {
-        out[sectionContent.indexOf("7 Jours")].push(act)
-      } else {
-        out[sectionContent.indexOf("30 Jours")].push(act)
-      }
+    this.setState({refreshing: true}, () => {
+      AsyncStorage.getItem("@Epitoken:hiddedToken", (err, res) => {
+        if (res)
+          this.setState({hidedToken: JSON.parse(res)}, () => load())
+        else
+          load()
+      })
     })
-    this.props.activeNotification(myActivities)
-    this.setState({activities: out, refreshing: false}, () => this.props.switchLoading(false))
-   })
   }
 
   getTokenLink = (act) => {
@@ -180,7 +197,7 @@ export default class ActList extends Component {
             style={{width: Dimensions.get("window").width}}
             dataSource={listData.cloneWithRowsAndSections(this.state.activities, sectionsID)}
             enableEmptySections={true}
-            renderRow={(rowData, sid, id) => (sid === sectionContent.indexOf("TOKEN") ) ? <ActivitieToken sendToken={this.sendToken} activitie={rowData} />: <Activitie activitie={rowData} section={sid}/>}
+            renderRow={(rowData, sid, id) => (sid === sectionContent.indexOf("TOKEN") ) ? <ActivitieToken hideAct={this.hideToken} sendToken={this.sendToken} activitie={rowData} />: <Activitie activitie={rowData} section={sid}/>}
             renderSectionHeader={(data, id) => (data.length) ? <Text style={[styles.header, {backgroundColor: sectionColor[id]}]}>{sectionContent[id]}</Text> : null}
           />
           :

@@ -6,6 +6,7 @@ import {
   Dimensions,
   TextInput,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'
 
@@ -61,7 +62,7 @@ export class ActivitieToken extends Component {
   }
 
   render() {
-    const {activitie} = this.props
+    const {activitie, hideAct} = this.props
     if (!activitie) return null
     const date = new Date(activitie.start.split(' ')[0])
     let room = ""
@@ -83,6 +84,14 @@ export class ActivitieToken extends Component {
             <Text style={styles.date}>{days_name[date.getDay()]} {date.getDate()} {month_name[date.getMonth()]} - {activitie.start.split(' ')[1].split(':').slice(0, 2).join(':')}</Text>
           </View>
           <Text style={[styles.room, {flex: 2}]}>{room}</Text>
+          <TouchableOpacity onPress={() => hideAct(activitie)}>
+            <Icon
+              name="times"
+              size={20}
+              color="#AAAAAA"
+              style={{}}
+            />
+          </TouchableOpacity>
         </View>
         <View style={{flexDirection: "row", justifyContent: "center", alignItems: "center", padding: 10}}>
           <TextInput
@@ -95,13 +104,14 @@ export class ActivitieToken extends Component {
             keyboardType={'numeric'}
             onSubmitEditing={() => this.sendToken()}
           />
-          <Icon
-            name="check-circle"
-            size={30}
-            color={this.isValidToken(this.state.token) ? "green" : "grey"}
-            style={{margin: 3, marginRight: 10}}
-            onPress={() => this.sendToken()}
-          />
+          <TouchableOpacity onPress={() => this.sendToken()}>
+            <Icon
+              name="check-circle"
+              size={30}
+              color={this.isValidToken(this.state.token) ? "green" : "grey"}
+              style={{margin: 3, marginRight: 10}}
+            />
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -195,3 +205,4 @@ const styles = StyleSheet.create({
     textAlignVertical: "center"
   }
 });
+// Ignorer les token

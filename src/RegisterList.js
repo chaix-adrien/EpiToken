@@ -87,7 +87,7 @@ class ProjectRegisterable extends Component {
   }
 
   displayRegisterButton = () => {
-    const {project} = this.props
+    const {project, register} = this.props
     const {moreData} = this.state
     if (moreData.nb_min === 1 && moreData.nb_max === 1) {
       return (
