@@ -21,29 +21,84 @@ import {apiToDate, myfetch} from '../index.android.js'
 const apiRoot = "https://intra.epitech.eu/"
 
 class ModuleRegisterable extends Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      show: false,
+      moreData: {}
+    }
+  }
+
+  onClick = () => {
+    if (this.state.show) {
+      this.setState({show: false})
+    } else {
+      this.loadMore().then(e => this.setState({show: true}))
+    }
+  }
+
+  loadMore = () => {
+    const {module} = this.props
+    if (this.state.moreData.nb_min)
+      return Promise.resolve(this.state.moreData)
+    return myfetch(apiRoot + module.title_link + "?format=json")
+    .then(data => {
+      data.registered = []
+      this.setState({moreData: data})
+      return data
+    })
+  }
+
   render() {
     const {module, register, hideModule, isHidded, showModule} = this.props
+    const {show, moreData} = this.state
     return (
-      <View style={styles.module}>
-        <Text style={{fontSize: 20, flex: 0.8, fontWeight: "bold"}}>{module.title} </Text>
-         <TouchableOpacity
-            style={styles.registerButton}
-            onPress={() => register(module)}
-         >
-         <Text style={{color: "white", fontWeight: "bold"}}>Register</Text>
-          </TouchableOpacity>
-       <TouchableOpacity
+      <TouchableOpacity style={styles.project} onPress={() => this.onClick()}>
+        <View style={{flexDirection: "row"}}>
+          <Text style={{fontSize: 20, flex: 0.8, fontWeight: "bold"}}>{module.title} </Text>
+          <TouchableOpacity
           style={{left: 4, top: -4}}
           onPress={() => {!isHidded ? hideModule(module) : showModule(module)}}
-       >
-         <Icon
+          >
+            <Icon
             name={!isHidded ? "times" : "eye"}
             size={20}
             color="#AAAAAA"
             style={{margin: 3, marginRight: 10, flex: 0.2}}
-          />
-        </TouchableOpacity>
-      </View>
+            />
+          </TouchableOpacity>
+        </View>
+       {show ?
+          <View>
+            <Text style={{margin: 5, fontStyle: 'italic'}}>{moreData.description}</Text>
+            <Text>Credit{moreData.credits > 1 ? "s" : ""}: {moreData.credits}</Text>
+            <Text>Fin d'inscription: {moreData.end_register}</Text>
+            <Text>{"\n"}Projects: </Text>
+            {moreData.activites.map((act, id) => {return (
+              <View key={id}>
+                <Text>{act.title}</Text>
+                <View style={{flexDirection: "row"}}>
+                  <Text>   {act.start.split(' ')[0]}</Text>
+                   <Icon
+                    name="long-arrow-right"
+                    size={20}
+                    color="#AAAAAA"
+                    style={{marginRight: 2, marginLeft: 2}}
+                  />
+                  <Text>{act.end.split(' ')[0]}</Text>
+                </View>
+              </View>
+            )})}
+            <TouchableOpacity
+            style={styles.registerButton}
+            onPress={() => register(module)}
+            >
+              <Text style={{color: "white", fontWeight: "bold"}}>Register</Text>
+            </TouchableOpacity>
+          </View>
+          : null
+       }
+      </TouchableOpacity>
     )
   }
 }
