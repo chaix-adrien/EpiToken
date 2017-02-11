@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "moment": "^2.15.2",
+    "pubsub-js": "^1.5.4",
     "react": "15.3.2",
     "react-native": "0.35.0",
     "react-native-action-button": "^2.0.9",
@@ -18,6 +19,7 @@
     "react-native-loader": "^1.1.0",
     "react-native-popover": "git+https://github.com/jeanregisser/react-native-popover.git",
     "react-native-push-notification": "^2.1.1",
+    "react-native-scrollable-tab-view": "^0.7.2",
     "react-native-swiper": "^1.5.2",
     "react-native-vector-icons": "^2.1.0"
   },

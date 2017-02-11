@@ -163,18 +163,17 @@ export default class EpiToken extends Component {
       else if (min > 5) return "#ffc107"
       else return "#d50000"
     }
-      console.log(act.room )
-      let room = ""
-      if (act.room) {
-	  if (act.room.code) {    
-	      room = act.room.code.split('/')
-	      room = room[room.length - 1]
-	  } else {
-	      room = "N/A"
-	  }
-      } else {
-	  room = "N/A"
-      }
+    let room = ""
+    if (act.room) {
+  	  if (act.room.code) {    
+  	      room = act.room.code.split('/')
+  	      room = room[room.length - 1]
+  	  } else {
+  	      room = "N/A"
+  	  }
+    } else {
+  	  room = "N/A"
+    }
 	  if (apiToDate(act.start).getTime() - 1000 * 60 * minBefore > Date.now()) {
       PushNotification.localNotificationSchedule({
           largeIcon: "ic_launcher",
@@ -267,7 +266,7 @@ export default class EpiToken extends Component {
     else
       return (
         <View style={styles.container}>
-          <Swiper showsButtons={false} pageMargin={10} loop={false}>
+          <Swiper showsButtons={false} pageMargin={10} loop={false} index={1}>
             <RegisterList tabLabel="Register" switchWaiting={this.switchWaiting} switchLoading={this.switchLoading} />
             <ActList tabLabel="Activités" activeNotification={this.activeNotification} switchWaiting={this.switchWaiting} switchLoading={this.switchLoading} />
             <ProjectCalendar tabLabel="Projets" switchWaiting={this.switchWaiting} switchLoading={this.switchLoading} />
