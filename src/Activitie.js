@@ -11,13 +11,13 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome'
 
 const days_name = [
-  "Lundi",
+    "Dimanche",
+    "Lundi",
   "Mardi",
   "Mercredi",
   "Jeudi",
   "Vendredi",
   "Samedi",
-  "Dimanche"
 ]
 
 const month_name = [
