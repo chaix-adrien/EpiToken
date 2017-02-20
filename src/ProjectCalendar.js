@@ -106,32 +106,26 @@ export default class ProjectCalendar extends Component {
     return out
   }
 
-  getFileUrl = (t) => `${apiRoot}module/${t.scolaryear}/${t.codemodule}/${t.codeinstance}/${t.codeacti}/project/file/?format=json`
+    getFileUrl = (t) => `${apiRoot}module/${t.scolaryear}/${t.codemodule}/${t.codeinstance}/${t.codeacti}/project/file/?format=json`
 
-  loadFiles = (tasks) => Promise.all(tasks.map(t => myfetch(this.getFileUrl(t))))
+    loadFiles = (tasks) => Promise.all(tasks.map(t => fetch(this.getFileUrl(t)).then(r => r.json())))
 
   loadTask = () => {
-    const today = new Date(Date.now())
-    var data = new FormData();
-    data.append("start", today.toISOString())
-    data.append("end", today.toISOString())
-    const header = {
-     method: "POST",
-     body: data
-    }
-    myfetch(apiRoot + "module/board/?format=json", header)
+      const today = new Date(Date.now());
+      start = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
+    myfetch(apiRoot + `module/board/?format=json&start=${start}&end=${start}`)
     .then(rep => {
-      if (!rep.length) {
+	if (!rep.length) {
         this.setState({loading: false})
         return
       }
       rep = rep.filter(t => t.registered)
       this.loadFiles(rep).then(files => {
-
         rep.forEach((task, id) => {
-          task.files = files[id].map(f => {
-            return {path: f.fullpath, name: f.title}
-          })
+	    if (!files[id].error)
+		task.files = files[id].map(f => {
+		    return {path: f.fullpath, name: f.title}
+		})
         })
         this.setState({loading: false, tasks: rep, gridData: this.taskToGridData(rep)}, () => this.forceUpdate())
       })
