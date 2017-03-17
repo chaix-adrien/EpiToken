@@ -112,9 +112,21 @@ export default class ActList extends Component {
         return dA.getTime() - dB.getTime()
       })
       myActivities.forEach((act, id) => {
+        if (act.rdv_group_registered) {
+          act.start = act.rdv_group_registered.split('|')[0];
+          act.end = act.rdv_group_registered.split('|')[1];
+        } else if (act.rdv_indiv_registered) {
+          act.start = act.rdv_indiv_registered.split('|')[0];
+          act.end = act.rdv_indiv_registered.split('|')[1];          
+        }
+        if (act.type_title === "Test Machine") {
+          let d = apiToDate(act.start);
+          d = new Date(d.getTime() - 30 * 60000);
+          act.start = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+        }
         const actDate = apiToDate(act.start)
         const actDateEnd = apiToDate(act.end)
-        if (act.allow_token && act.event_registered != 'present' && !this.isHidedToken(act)) {
+        if (act.allow_token && act.event_registered != 'present' && !this.isHidedToken(act) && act.type_title !== "Pitch") {
           out[sectionContent.indexOf("TOKEN")].push(act)
         }
         if (today.getTime() < actDateEnd.getTime() && today.getTime() > actDate.getTime()) {
