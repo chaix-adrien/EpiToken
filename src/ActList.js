@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'
 
-import {ActivitieToken, Activitie} from './Activitie.js'
+import {ActivitieToken, Activitie, month_name, } from './Activitie.js'
 import {apiToDate, myfetch} from '../index.android.js'
 
 const apiRoot = "https://intra.epitech.eu/"
@@ -62,34 +62,6 @@ export default class ActList extends Component {
   }
 
 
-  setNotification = (act, minBefore) => {
-    if (apiToDate(act.start).getTime() - 1000 * 60 * minBefore > Date.now()) {
-      PushNotification.localNotificationSchedule({
-          largeIcon: "ic_launcher",
-          smallIcon: "ic_launcher",
-          bigText: "My big text that will be shown when notification is expanded",
-          vibrate: true,
-          title: act.acti_title,
-          message: "My Notification Message",
-          color: this.minToColor(minBefore),
-          playSound: true,
-          soundName: 'default',
-          date: new Date(apiToDate(act.start).getTime() - 1000 * 60 * minBefore),
-      });
-    }
-  }
-
-  activeNotification = (acts, refs, minBefore) => {
-    acts.forEach(act => {
-      const notif = refs.get(this.getTokenLink(act)) ? refs.get(this.getTokenLink(act)) : []
-      if (!notif.length || notif.indexOf(minBefore) === -1) {
-        this.setNotification(act, minBefore)
-        notif.push(minBefore)
-        refs.set(this.getTokenLink(act), notif)
-      }
-    })
-  }
-
   isHidedToken = (act) => this.state.hidedToken.some(m => m.codeacti === act.codeacti && m.codeevent === act.codeevent)
 
   hideToken = (act) => {
@@ -103,15 +75,17 @@ export default class ActList extends Component {
   loadActivities = () => {
    const load = () => myfetch(apiRoot + "planning/load" + "?format=json&start=" + getStartDate() + "&end=" + getEndDate())
    .then(activitiesBrut => {
-      const myActivities = activitiesBrut.filter(act => (__DEV__) ? act.event_registered : act.event_registered === "registered")
-      const out = sectionContent.map(e => [])
       const today = new Date(getNowDate())
+      const myActivities = activitiesBrut.filter(act => ((__DEV__) ? act.event_registered : act.event_registered === "registered"))
+      const out = sectionContent.map(e => [])
       myActivities.sort((a, b) => {
         const dA = apiToDate(a.start)
         const dB = apiToDate(b.start)
         return dA.getTime() - dB.getTime()
       })
+      this.props.setMainNotification(myActivities.filter(act => apiToDate(act.start).getTime() > today.getTime())[0])
       myActivities.forEach((act, id) => {
+        console.log(this.getTokenLink(act))
         if (act.rdv_group_registered) {
           act.start = act.rdv_group_registered.split('|')[0];
           act.end = act.rdv_group_registered.split('|')[1];

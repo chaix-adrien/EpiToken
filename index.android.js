@@ -85,6 +85,7 @@ export default class EpiToken extends Component {
     }
     this.loadedAct = []
     this.tryToLogOnMount = true
+    PushNotification.cancelAllLocalNotifications()
   }
 
   componentWillMount() {
@@ -123,7 +124,6 @@ export default class EpiToken extends Component {
    const header = {
        method: "POST",
    }
-   PushNotification.cancelAllLocalNotifications()
    AsyncStorage.removeItem('@EpiToken:refsNotifications')
    Keychain.setGenericPassword("UNDEFINED", "UNDEFINED")
    this.setState({loged: false})
@@ -157,7 +157,8 @@ export default class EpiToken extends Component {
   }
 
 
-  setNotification = (act, minBefore) => {
+  setNotification = (act, minBefore, ongoing = false) => {
+    console.log("GREP ICI", ongoing)
     const minToColor = (min) => {
       if (min > 10) return "#33691e"
       else if (min > 5) return "#ffc107"
@@ -174,19 +175,22 @@ export default class EpiToken extends Component {
     } else {
   	  room = "N/A"
     }
-	  if (apiToDate(act.start).getTime() - 1000 * 60 * minBefore > Date.now()) {
-      PushNotification.localNotificationSchedule({
+    notif = {
           largeIcon: "ic_launcher",
           smallIcon: "ic_launcher",
-          vibrate: true,
+          vibrate: !ongoing,
           title: act.acti_title,
           message: room + "  " + act.start.split(' ')[1].split(':').slice(0, 2).join(':') + " -> " + act.end.split(' ')[1].split(':').slice(0, 2).join(':'),
-          color: minToColor(minBefore),
-          playSound: true,
+          color: "#F5F500",
+          playSound: !ongoing,
           soundName: 'default',
+          ongoing: ongoing,
           date: new Date(apiToDate(act.start).getTime() - 1000 * 60 * minBefore),
-      });
-    }
+      } 
+    if (ongoing)
+      PushNotification.localNotification(notif)
+    else if (apiToDate(act.start).getTime() - 1000 * 60 * minBefore > Date.now())
+      PushNotification.localNotificationSchedule(notif)
   }
 
   activeNotification = (acts) => {
@@ -268,7 +272,7 @@ export default class EpiToken extends Component {
         <View style={styles.container}>
           <Swiper showsButtons={false} pageMargin={10} loop={false} index={1}>
             <RegisterList tabLabel="Register" switchWaiting={this.switchWaiting} switchLoading={this.switchLoading} />
-            <ActList tabLabel="Activités" activeNotification={this.activeNotification} switchWaiting={this.switchWaiting} switchLoading={this.switchLoading} />
+            <ActList tabLabel="Activités" activeNotification={this.activeNotification} switchWaiting={this.switchWaiting} switchLoading={this.switchLoading} setMainNotification={(act) => this.setNotification(act, 0, true)}/>
             <ProjectCalendar tabLabel="Projets" switchWaiting={this.switchWaiting} switchLoading={this.switchLoading} />
           </Swiper>
         </View>
